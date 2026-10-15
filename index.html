@@ -122,14 +122,14 @@ p.n{max-width:440px;color:var(--mute);font-size:11px;margin:14px 0 0}
 </footer>
 <script>
 const $=s=>document.querySelector(s),T=['1/1','1/2','1/4','1/8','1/8T','1/16','1/16T','1/32'],B=[4,2,1,.5,1/3,.25,1/6,.125];
-const APP_VERSION='v1.2.0',APP_DATE='2026-10-15';
+const APP_VERSION='v1.3.0',APP_DATE='2026-10-15';
 const L=['7','8','9','4','5','6','1','2','3','.','0','ent'],SI=[9,10,11,6,7,8,3,4,5,0,1,2],KEYS='123qweasdzxc';
 const DN=['kick','snare','clap','hat','open','tom','rim','bell','bass','perc','shaker','crash'],SC=[0,2,4,7,9,12,14,16,19,21,24,26],NN='c c# d d# e f f# g g# a a# b'.split(' '),BASE=[0,65.41,130.81,261.63];
 const MODES=[['ptn','ptn'],['bpm','tempo'],['len','length'],['bar','bar'],['tmg','timing'],['fx','fx'],['snd','sound'],['smp','sample']];
 const FF=['level','pitch','decay','swing'],FXN=['delay','filter','tempo'];
 const KITS=['classic','electro','minimal'];
 const PRESET_KEY='ko2-presets-v1';
-const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8],kit:0,practice:0,mute:[0,0,0,0],solo:null,tapTimes:[],presetSlot:0,humanize:0.15,live:0,liveMuted:0,phraseMode:0,phraseIndex:0,phraseStep:-1};
+const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8],kit:0,practice:0,mute:[0,0,0,0],solo:null,tapTimes:[],presetSlot:0,humanize:0.15,live:0,liveMuted:0,phraseMode:0,phraseIndex:0,phraseStep:-1,paintMode:0,paintValue:1,paintDragging:0};
 const kv=[[.3,.4],[1,.1],[.3,0]],ke=[.5,.3],fv=[.8,.5,.3,0];
 const snd=[0,1,2,3].map(()=>Array.from({length:12},()=>({p:1,d:1,v:1}))),pats={},samples={};
 const PT=(g,n)=>pats[g+'_'+n]??={len:16,s:Array.from({length:12},()=>Array(64).fill(0))};
@@ -181,7 +181,7 @@ function loop(){while(q.length&&AC&&q[0].t<=AC.currentTime){S.cur=q.shift().n;if
 function msg(m){$('#lm').textContent=m}
 // UI construction
 const st=$('#st'),pads=$('#pads');
-for(let k=0;k<16;k++){const b=document.createElement('button');b.onclick=()=>{const p=pr(),ix=S.bar*16+k;if(ix<p.len){p.s[S.sel][ix]^=1;draw()}};st.append(b)}
+for(let k=0;k<16;k++){const b=document.createElement('button');b.addEventListener('pointerdown',()=>{const p=pr(),ix=S.bar*16+k;if(ix<p.len){if(S.paintMode){S.paintDragging=1;S.paintValue=!p.s[S.sel][ix];p.s[S.sel][ix]=S.paintValue;draw();} else {p.s[S.sel][ix]^=1;draw();}}});b.addEventListener('pointerenter',()=>{if(!S.paintMode||!S.paintDragging)return;const p=pr(),ix=S.bar*16+k;if(ix<p.len){p.s[S.sel][ix]=S.paintValue;draw();}});b.addEventListener('pointerup',()=>{S.paintDragging=0});st.append(b)}
 'ABCD'.split('').forEach((c,g)=>{const b=document.createElement('button');b.className='b';b.textContent='group '+c;b.onclick=()=>{init();if(S.shift){S.solo=S.solo===g?null:g;S.mute[g]=0;S.shift=0;msg(S.solo===null?'solo off':'solo '+c);draw();return}S.g=g;S.bar=0;S.num=null;sync();msg('group '+c);draw()};$('#grp').append(b)});
 const presetContainer=$('#presets');for(let i=0;i<4;i++){const btn=document.createElement('button');btn.className='b';btn.textContent='slot '+(i+1);btn.onclick=()=>{const active = S.presetSlot===i;S.presetSlot=i;msg(active?'slot '+(i+1)+' prêt':'slot '+(i+1)+' sélectionné');if(active){savePreset(i);}else{loadPreset(i);}};presetContainer.append(btn)}
 const exportBtn=document.createElement('button');exportBtn.className='b';exportBtn.textContent='export';exportBtn.onclick=()=>{const payload={version:APP_VERSION,presets:loadPresets()};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ko2-presets-'+Date.now()+'.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);msg('presets exportés');};
@@ -189,7 +189,7 @@ const importBtn=document.createElement('button');importBtn.className='b';importB
 const importInput=document.createElement('input');importInput.type='file';importInput.accept='.json,application/json';importInput.hidden=true;importInput.onchange=evt=>{const file=evt.target.files&&evt.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(String(reader.result));const presets=Array.isArray(data)?data:Array.isArray(data.presets)?data.presets:loadPresets();localStorage.setItem(PRESET_KEY,JSON.stringify(Array.from({length:4},(_,i)=>presets[i]||null)));msg('presets importés');if(Array.isArray(presets)&&presets[0])loadPreset(0);draw();}catch(err){msg('fichier invalide');}};reader.readAsText(file);evt.target.value='';};
 importBtn.onclick=()=>importInput.click();
 presetContainer.append(exportBtn,importBtn,importInput);
-const liveControls=$('#live-controls');['fill','mute all','live','phrase'].forEach((label,idx)=>{const b=document.createElement('button');b.className='b';b.textContent=label;b.dataset.action=label;b.onclick=()=>{if(label==='live'){S.live=!S.live;S.liveMuted=0;msg(S.live?'mode performance live':'mode normal');draw();return;} if(label==='phrase'){S.phraseMode=!S.phraseMode;S.phraseIndex=0;S.phraseStep=-1;msg(S.phraseMode?'phrase mode actif':'phrase off');draw();return;} if(label==='fill'){if(!S.live){msg('active le live');return;} const p=pr();const stepBase=(S.bar*16)%p.len;[0,4,8,12].forEach(off=>{const pos=(stepBase+off)%p.len;for(let i=0;i<12;i++)if(i===S.sel||i===S.sel+1||i===S.sel+2)p.s[i][pos]=1;});msg('fill ajouté');draw();return;} S.liveMuted=!S.liveMuted;S.mute=[1,1,1,1];if(!S.liveMuted){S.mute=[0,0,0,0];}msg(S.liveMuted?'tout muet':'tout audible');draw();};liveControls.append(b)});
+const liveControls=$('#live-controls');['fill','mute all','live','phrase','paint'].forEach((label,idx)=>{const b=document.createElement('button');b.className='b';b.textContent=label;b.dataset.action=label;b.onclick=()=>{if(label==='paint'){S.paintMode=!S.paintMode;S.paintDragging=0;msg(S.paintMode?'paint mode on':'paint mode off');draw();return;} if(label==='live'){S.live=!S.live;S.liveMuted=0;msg(S.live?'mode performance live':'mode normal');draw();return;} if(label==='phrase'){S.phraseMode=!S.phraseMode;S.phraseIndex=0;S.phraseStep=-1;msg(S.phraseMode?'phrase mode actif':'phrase off');draw();return;} if(label==='fill'){if(!S.live){msg('active le live');return;} const p=pr();const stepBase=(S.bar*16)%p.len;[0,4,8,12].forEach(off=>{const pos=(stepBase+off)%p.len;for(let i=0;i<12;i++)if(i===S.sel||i===S.sel+1||i===S.sel+2)p.s[i][pos]=1;});msg('fill ajouté');draw();return;} S.liveMuted=!S.liveMuted;S.mute=[1,1,1,1];if(!S.liveMuted){S.mute=[0,0,0,0];}msg(S.liveMuted?'tout muet':'tout audible');draw();};liveControls.append(b)});
 MODES.forEach(([k,l])=>{const b=document.createElement('button');b.className='b';b.id='m_'+k;b.textContent=l;b.onclick=()=>modeBtn(k);$('#modes').append(b)});
 L.forEach((l,gi)=>{const b=document.createElement('button');b.className='b pad';b.innerHTML='<span>'+l+'</span><small></small>';b.onpointerdown=e=>{e.preventDefault();padHit(gi)};pads.append(b)});
 function modeBtn(k){init();
@@ -263,7 +263,7 @@ function draw(){const p=pr(),pos=S.cur>=0?S.cur%p.len:-1;
   b.lastChild.textContent=S.fh?(i<4?FF[i]:''):S.g?NN[(SC[i])%12]+(i>4?'+':''):DN[i]});
  [...$('#grp').children].forEach((b,g)=>b.classList.toggle('act',g==S.g));
  [...$('#presets').children].forEach((b,idx)=>b.classList.toggle('act',S.presetSlot===idx));
- [...$('#live-controls').children].forEach((b)=>{const label=b.textContent.trim(); b.classList.toggle('act',label==='live'&&S.live || label==='mute all'&&S.liveMuted || label==='phrase'&&S.phraseMode);});
+ [...$('#live-controls').children].forEach((b)=>{const label=b.textContent.trim(); b.classList.toggle('act',label==='live'&&S.live || label==='mute all'&&S.liveMuted || label==='phrase'&&S.phraseMode || label==='paint'&&S.paintMode);});
  MODES.forEach(([k])=>$('#m_'+k).classList.toggle('act',S.mode==k&&!S.edit||k=='snd'&&S.edit||k=='smp'&&!!mr));
  $('#play').textContent=S.play?'stop':'play';$('#rec').classList.toggle('act',!!S.rec);$('#shift').classList.toggle('act',!!S.shift);$('#train').classList.toggle('act',!!S.practice);$('#kit').classList.toggle('act',true);$('#live').classList.toggle('act',!!S.live);$('#ff').textContent=FF[S.ff]}
 hydrateState();sync();syncKnobs();draw();loop();
