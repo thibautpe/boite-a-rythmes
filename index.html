@@ -122,15 +122,15 @@ p.n{max-width:440px;color:var(--mute);font-size:11px;margin:14px 0 0}
 </footer>
 <script>
 const $=s=>document.querySelector(s),T=['1/1','1/2','1/4','1/8','1/8T','1/16','1/16T','1/32'],B=[4,2,1,.5,1/3,.25,1/6,.125];
-const APP_VERSION='v1.3.0',APP_DATE='2026-10-15';
+const APP_VERSION='v1.4.0',APP_DATE='2026-10-15';
 const L=['7','8','9','4','5','6','1','2','3','.','0','ent'],SI=[9,10,11,6,7,8,3,4,5,0,1,2],KEYS='123qweasdzxc';
 const DN=['kick','snare','clap','hat','open','tom','rim','bell','bass','perc','shaker','crash'],SC=[0,2,4,7,9,12,14,16,19,21,24,26],NN='c c# d d# e f f# g g# a a# b'.split(' '),BASE=[0,65.41,130.81,261.63];
 const MODES=[['ptn','ptn'],['bpm','tempo'],['len','length'],['bar','bar'],['tmg','timing'],['fx','fx'],['snd','sound'],['smp','sample']];
-const FF=['level','pitch','decay','swing'],FXN=['delay','filter','tempo'];
-const KITS=['classic','electro','minimal'];
+const FF=['level','pitch','decay','swing'],FXN=['delay','filter','tempo','reverb','saturation'];
+const KITS=['classic','electro','minimal','analog','ambient','club'];
 const PRESET_KEY='ko2-presets-v1';
-const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8],kit:0,practice:0,mute:[0,0,0,0],solo:null,tapTimes:[],presetSlot:0,humanize:0.15,live:0,liveMuted:0,phraseMode:0,phraseIndex:0,phraseStep:-1,paintMode:0,paintValue:1,paintDragging:0};
-const kv=[[.3,.4],[1,.1],[.3,0]],ke=[.5,.3],fv=[.8,.5,.3,0];
+const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8],kit:0,practice:0,mute:[0,0,0,0],solo:null,tapTimes:[],presetSlot:0,humanize:0.15,live:0,liveMuted:0,phraseMode:0,phraseIndex:0,phraseStep:-1,paintMode:0,paintValue:1,paintDragging:0,reverbWet:.25,reverbDecay:.7,saturation:.35,drive:.5};
+const kv=[[.3,.4],[1,.1],[.3,0],[.25,.7],[.55,.75]],ke=[.5,.3],fv=[.8,.5,.3,0];
 const snd=[0,1,2,3].map(()=>Array.from({length:12},()=>({p:1,d:1,v:1}))),pats={},samples={};
 const PT=(g,n)=>pats[g+'_'+n]??={len:16,s:Array.from({length:12},()=>Array(64).fill(0))};
 const cl=(v,a,b)=>Math.min(b,Math.max(a,v)),pr=(g=S.g)=>PT(g,S.pat[g]);
@@ -139,17 +139,26 @@ function loadPresets(){try{return JSON.parse(localStorage.getItem(PRESET_KEY))||
 function savePreset(slot){const data={state:{bpm:S.bpm,tm:S.tm,sw:S.sw,sel:S.sel,g:S.g,pat:[...S.pat],bar:S.bar,fx:S.fx,mode:S.mode,lv:[...S.lv],kit:S.kit,practice:S.practice,humanize:S.humanize,mute:[...S.mute],solo:S.solo},pats:serializePats()};const presets=loadPresets();presets[slot]=data;localStorage.setItem(PRESET_KEY,JSON.stringify(presets));msg('preset '+(slot+1)+' enregistré');draw();}
 function loadPreset(slot){const presets=loadPresets();const data=presets[slot];if(!data)return msg('preset vide');Object.keys(pats).forEach(k=>delete pats[k]);Object.assign(pats,data.pats||{});const st=data.state||{};S.bpm=st.bpm??S.bpm;S.tm=st.tm??S.tm;S.sw=st.sw??S.sw;S.sel=st.sel??S.sel;S.g=st.g??S.g;S.pat=Array.isArray(st.pat)?[...st.pat]:[...S.pat];S.bar=st.bar??0;S.fx=st.fx??0;S.mode=st.mode??'ptn';S.lv=Array.isArray(st.lv)?[...st.lv]:[...S.lv];S.kit=st.kit??0;S.practice=st.practice??0;S.humanize=st.humanize??S.humanize;S.mute=Array.isArray(st.mute)?[...st.mute]:[...S.mute];S.solo=st.solo??null;S.presetSlot=slot;msg('preset '+(slot+1)+' chargé');draw();}
 function hydrateState(){try{const presets=loadPresets();const saved=presets[0];if(saved&&saved.state){const st=saved.state;S.bpm=st.bpm??S.bpm;S.tm=st.tm??S.tm;S.sw=st.sw??S.sw;S.g=st.g??S.g;S.pat=Array.isArray(st.pat)?[...st.pat]:[...S.pat];S.lv=Array.isArray(st.lv)?[...st.lv]:[...S.lv];S.kit=st.kit??0;S.practice=st.practice??0;S.humanize=st.humanize??S.humanize;S.mute=Array.isArray(st.mute)?[...S.mute]:[...S.mute];S.solo=st.solo??null;}}catch{} }
-let AC,bus,filt,dly,fbk,dsd,mast,gg,nb;
+let AC,bus,filt,dly,fbk,dsd,mast,gg,nb,rev,revGain,sat,satGain;
+function makeDistortionCurve(amount){const samples=44100;const curve=new Float32Array(samples);const k=Math.min(50,Math.max(1,amount));for(let i=0;i<samples;i++){const x=i*2/samples-1;curve[i]=(Math.PI/2)*Math.sin(Math.asin(x))*k/(k+1);}
+ return curve;}
 function init(){if(AC){AC.resume();return}
  AC=new(window.AudioContext||window.webkitAudioContext)();mast=AC.createGain();mast.gain.value=.8;mast.connect(AC.destination);
- filt=AC.createBiquadFilter();filt.frequency.value=18000;filt.connect(mast);bus=AC.createGain();bus.connect(filt);
+ filt=AC.createBiquadFilter();filt.frequency.value=18000;filt.connect(mast);
+ sat=AC.createWaveShaper();satGain=AC.createGain();sat.oversample='4x';sat.curve=makeDistortionCurve(1+S.saturation*20);
+ rev=AC.createConvolver();const ir=AC.createBuffer(2,AC.sampleRate*2,AC.sampleRate);for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<d.length;i++){d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,S.reverbDecay||.7);}}
+ rev.buffer=ir;revGain=AC.createGain();
+ bus=AC.createGain();bus.connect(filt);bus.connect(sat);sat.connect(satGain);satGain.connect(mast);bus.connect(rev);rev.connect(revGain);revGain.connect(mast);
  dly=AC.createDelay(1);fbk=AC.createGain();dsd=AC.createGain();bus.connect(dsd);dsd.connect(dly);dly.connect(fbk);fbk.connect(dly);dly.connect(mast);
  gg=[0,1,2,3].map(g=>{const x=AC.createGain();x.gain.value=S.lv[g];x.connect(bus);return x});
  nb=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
  applyFx()}
 function applyFx(){if(!AC)return;const a=kv[0],b=kv[1];dsd.gain.value=a[0]*.8;fbk.gain.value=a[1]*.85;dly.delayTime.value=60/S.bpm*.75;
- filt.frequency.value=200*Math.pow(80,b[0]);filt.Q.value=.5+b[1]*14}
-function getKitFactor(g){if(S.kit===1)return [1,1.12,0.94,1.06][g]||1; if(S.kit===2)return [1,0.88,1.2,0.96][g]||1; return 1;}
+ filt.frequency.value=200*Math.pow(80,b[0]);filt.Q.value=.5+b[1]*14;
+ if(sat){sat.curve=makeDistortionCurve(1 + S.saturation*20);satGain.gain.value=.22 + S.saturation*1.5;}
+ if(revGain){revGain.gain.value=S.reverbWet*1.1;}
+}
+function getKitFactor(g){if(S.kit===1)return [1,1.12,0.94,1.06][g]||1; if(S.kit===2)return [1,0.88,1.2,0.96][g]||1; if(S.kit===3)return [0.96,1.16,1.04,1.1][g]||1; if(S.kit===4)return [1.08,0.94,1.18,1.02][g]||1; if(S.kit===5)return [0.9,1.2,1.08,1.15][g]||1; return 1;}
 function voice(g,i,t){const s=snd[g][i],out=gg[g],P=s.p,D=s.d,sm=samples[g+'_'+i];
  if(S.practice&&g>0)return;
  if(S.solo!==null&&g!==S.solo&&S.solo!==0)return;
@@ -216,7 +225,7 @@ function step(d){init();const m=S.mode,f=S.shift?10:1;S.shift=0;
  else if(m=='len'){const p=pr();p.len=cl(p.len+d*(f>1?16:1),1,64);S.bar=cl(S.bar,0,Math.ceil(p.len/16)-1)}
  else if(m=='bar')S.bar=cl(S.bar+d,0,Math.ceil(pr().len/16)-1);
  else if(m=='tmg')S.tm=cl(S.tm+d,0,7);
- else if(m=='fx'){S.fx=(S.fx+d+3)%3;syncKnobs()}
+ else if(m=='fx'){S.fx=(S.fx+d+FXN.length)%FXN.length;syncKnobs()}
  else if(m=='snd'){const s=snd[S.g][S.sel];s.p=cl(s.p*Math.pow(2,d/12),.25,4);voice(S.g,S.sel,AC.currentTime)}
  draw()}
 $('#mi').onclick=()=>step(-1);$('#pl').onclick=()=>step(1);$('#play').onclick=play;
@@ -236,7 +245,14 @@ function sync(){$('#fd').value=(S.ff==0?S.lv[S.g]:fv[S.ff])*100}
 const KE=[$('#kx'),$('#ky')];
 function setKnob(n,v){v=cl(v,0,1);const s=snd[S.g][S.sel];
  if(S.edit){ke[n]=v;if(n==0)s.p=Math.pow(2,2*v-1);else s.d=.2*Math.pow(15,v);msg((n?'durée ':'hauteur ')+Math.round(v*100)+'%')}
- else{kv[S.fx][n]=v;if(S.fx==2){if(n==0){S.bpm=Math.round(60+v*140)}else S.sw=v*.6}applyFx();msg(FXN[S.fx]+' '+'xy'[n]+' '+Math.round(v*100)+'%')}
+ else{
+  kv[S.fx][n]=v;
+  if(S.fx==2){if(n==0){S.bpm=Math.round(60+v*140)}else S.sw=v*.6}
+  else if(S.fx==3){if(n==0)S.reverbWet=v;else S.reverbDecay=v;msg('reverb '+(n?'decay':'wet')+' '+Math.round(v*100)+'%')}
+  else if(S.fx==4){if(n==0)S.saturation=v;else S.drive=v;msg('saturation '+(n?'drive':'tone')+' '+Math.round(v*100)+'%')}
+  else{msg(FXN[S.fx]+' '+'xy'[n]+' '+Math.round(v*100)+'%')}
+  applyFx();
+ }
  syncKnobs();draw()}
 const kval=n=>S.edit?ke[n]:kv[S.fx][n];
 function syncKnobs(){KE.forEach((k,n)=>k.firstChild.style.transform='rotate('+(-135+270*kval(n))+'deg)')}

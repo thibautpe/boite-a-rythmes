@@ -1,10 +1,9 @@
 # Todo list — boîte à rythmes
 
 ## En cours
-- [ ] Feature 4 — mode paint / édition rapide des steps
+- [ ] Feature 5 — effets audio avancés (reverb, saturation)
 
 ## À faire
-- [ ] Feature 5 — effets audio avancés (reverb, saturation)
 - [ ] Feature 6 — plus de kits sonores et réglages par groupe
 - [ ] Tester le comportement clavier et le PWA sur mobile
 - [ ] Finaliser la roadmap de fonctionnalités v2
@@ -14,6 +13,9 @@
 - [x] Vérifier la structure du dépôt
 - [x] Publier sur GitHub
 - [x] Feature 1 — export / import des presets utilisateur
+- [x] Feature 2 — mode performance live
+- [x] Feature 3 — enchaînement de patterns / phrases
+- [x] Feature 4 — mode paint / édition rapide des steps
 - [x] Ajouter un mode pratique / entraînement
 - [x] Implémenter la sauvegarde des presets utilisateur
 - [x] Ajouter le tap tempo

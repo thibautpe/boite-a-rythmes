@@ -1,8 +1,7 @@
-# README
+# K.O. II — boîte à rythmes web
 
-La documentation du projet est disponible dans le dossier `docs/wiki/`.
+Application PWA statique de boîte à rythmes visuelle. L’interface est conçue pour être simple, portable et compatible avec un hébergement statique comme GitHub Pages.
 
-<<<<<<< HEAD
 Fichiers principaux :
 - `index.html` : interface principale et logique de séquenceur
 - `sw.js` : cache PWA et mise à jour de version
@@ -26,24 +25,18 @@ Fichiers principaux :
 - Les boutons `−` et `+` ajustent le mode courant (tempo, longueur, timing, etc.).
 
 - Dernière mise à jour : 2026-10-15
-- Modifications : ajout d’un mode d’entraînement, d’un tap tempo, de presets locaux, d’un gestionnaire de kits sonores et d’une logique de solo/kit plus pratique pour les sessions de jam ; ajout du mode performance live avec fill et mute global ; ajout d’un phraseur de patterns pour enchaîner quatre motifs sur une section ; ajout du mode paint pour remplir ou effacer les steps plus rapidement ; mise à jour du cache PWA et de la version de publication.
-- À venir : effets audio avancés et ajout de kits sonores plus nombreux.
+- Modifications : ajout d’un mode d’entraînement, d’un tap tempo, de presets locaux, d’un mode performance live, d’un phraseur de patterns, du mode paint et d’effets audio avancés ; mise à jour du cache PWA et de la version de publication.
+- À venir : kits sonores supplémentaires, réglages avancés par groupe et validation mobile finale.
 
-### Feature active : mode performance live
+### Feature active : performance live + effets
 - Le bouton `live` active un mode de scène plus rapide pour jouer et ajuster un groove en direct.
 - Le bouton `fill` injecte un accent rapide sur le pattern courant.
 - Le bouton `mute all` coupe ou remet tout le son d’un coup pour préparer un break ou une transition.
 - Le bouton `phrase` active un cycle de quatre motifs pour créer une section en boucle.
 - Le bouton `paint` active l’édition rapide des steps par glisser-déposer.
+- Les effets `reverb` et `saturation` sont désormais pilotés via les effets du séquenceur.
 
 ## Notes
 - Tous les chemins sont relatifs : le projet fonctionne dans un sous-dossier GitHub Pages.
 - Le PWA fonctionne hors ligne après une première visite en ligne.
 - Le service worker met en cache les ressources installées et invalide les anciennes versions lors du déploiement.
-=======
-- [Accueil](docs/wiki/Home.md)
-- [Installation](docs/wiki/Installation.md)
-- [Utilisation](docs/wiki/Utilisation.md)
-- [Raccourcis clavier](docs/wiki/Raccourcis-clavier.md)
-- [Journal des changements](docs/wiki/Changelog.md)
->>>>>>> 28e029ce0b4220f51c7dca57e3cab384cdc3b7c2
