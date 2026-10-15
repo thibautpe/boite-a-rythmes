@@ -118,27 +118,27 @@ p.n{max-width:440px;color:var(--mute);font-size:11px;margin:14px 0 0}
 <p class="n">Clavier : 1 2 3 / q w e / a s d / z x c pour les pads, espace pour play, r pour rec. Les sons sont synthétisés : groupe A percussions, B basse, C pluck, D cloches. Maintiens fader puis touche un des 4 pads du bas pour choisir sa fonction. shift + sound ouvre l'édition du son (x hauteur, y durée). shift + ptn efface le pattern. Le bouton sample enregistre le micro sur le pad sélectionné.</p>
 <footer id="foot" aria-label="Informations du projet">
   <div class="brand"><img src="icons/andwhynot-logo.png" alt="Logo And Why Not"><span>K.O. II</span></div>
-  <div class="meta"><span id="app-version">v1.7.0</span><span>•</span><span id="app-date">2026-10-15</span></div>
+  <div class="meta"><span id="app-version">v1.5.0</span><span>•</span><span id="app-date">2026-10-15</span></div>
 </footer>
 <script>
 const $=s=>document.querySelector(s),T=['1/1','1/2','1/4','1/8','1/8T','1/16','1/16T','1/32'],B=[4,2,1,.5,1/3,.25,1/6,.125];
-const APP_VERSION='v1.4.0',APP_DATE='2026-10-15';
+const APP_VERSION='v1.5.0',APP_DATE='2026-10-15';
 const L=['7','8','9','4','5','6','1','2','3','.','0','ent'],SI=[9,10,11,6,7,8,3,4,5,0,1,2],KEYS='123qweasdzxc';
 const DN=['kick','snare','clap','hat','open','tom','rim','bell','bass','perc','shaker','crash'],SC=[0,2,4,7,9,12,14,16,19,21,24,26],NN='c c# d d# e f f# g g# a a# b'.split(' '),BASE=[0,65.41,130.81,261.63];
 const MODES=[['ptn','ptn'],['bpm','tempo'],['len','length'],['bar','bar'],['tmg','timing'],['fx','fx'],['snd','sound'],['smp','sample']];
 const FF=['level','pitch','decay','swing'],FXN=['delay','filter','tempo','reverb','saturation'];
 const KITS=['classic','electro','minimal','analog','ambient','club'];
 const PRESET_KEY='ko2-presets-v1';
-const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8],kit:0,practice:0,mute:[0,0,0,0],solo:null,tapTimes:[],presetSlot:0,humanize:0.15,live:0,liveMuted:0,phraseMode:0,phraseIndex:0,phraseStep:-1,paintMode:0,paintValue:1,paintDragging:0,reverbWet:.25,reverbDecay:.7,saturation:.35,drive:.5};
+const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8],groupBoost:[1,1,1,1],kit:0,practice:0,mute:[0,0,0,0],solo:null,tapTimes:[],presetSlot:0,humanize:0.15,live:0,liveMuted:0,phraseMode:0,phraseIndex:0,phraseStep:-1,paintMode:0,paintValue:1,paintDragging:0,reverbWet:.25,reverbDecay:.7,saturation:.35,drive:.5};
 const kv=[[.3,.4],[1,.1],[.3,0],[.25,.7],[.55,.75]],ke=[.5,.3],fv=[.8,.5,.3,0];
 const snd=[0,1,2,3].map(()=>Array.from({length:12},()=>({p:1,d:1,v:1}))),pats={},samples={};
 const PT=(g,n)=>pats[g+'_'+n]??={len:16,s:Array.from({length:12},()=>Array(64).fill(0))};
 const cl=(v,a,b)=>Math.min(b,Math.max(a,v)),pr=(g=S.g)=>PT(g,S.pat[g]);
 function serializePats(){const out={};Object.keys(pats).forEach(k=>{out[k]=pats[k];});return out;}
 function loadPresets(){try{return JSON.parse(localStorage.getItem(PRESET_KEY))||Array.from({length:4},()=>null);}catch{return Array.from({length:4},()=>null);}}
-function savePreset(slot){const data={state:{bpm:S.bpm,tm:S.tm,sw:S.sw,sel:S.sel,g:S.g,pat:[...S.pat],bar:S.bar,fx:S.fx,mode:S.mode,lv:[...S.lv],kit:S.kit,practice:S.practice,humanize:S.humanize,mute:[...S.mute],solo:S.solo},pats:serializePats()};const presets=loadPresets();presets[slot]=data;localStorage.setItem(PRESET_KEY,JSON.stringify(presets));msg('preset '+(slot+1)+' enregistré');draw();}
-function loadPreset(slot){const presets=loadPresets();const data=presets[slot];if(!data)return msg('preset vide');Object.keys(pats).forEach(k=>delete pats[k]);Object.assign(pats,data.pats||{});const st=data.state||{};S.bpm=st.bpm??S.bpm;S.tm=st.tm??S.tm;S.sw=st.sw??S.sw;S.sel=st.sel??S.sel;S.g=st.g??S.g;S.pat=Array.isArray(st.pat)?[...st.pat]:[...S.pat];S.bar=st.bar??0;S.fx=st.fx??0;S.mode=st.mode??'ptn';S.lv=Array.isArray(st.lv)?[...st.lv]:[...S.lv];S.kit=st.kit??0;S.practice=st.practice??0;S.humanize=st.humanize??S.humanize;S.mute=Array.isArray(st.mute)?[...st.mute]:[...S.mute];S.solo=st.solo??null;S.presetSlot=slot;msg('preset '+(slot+1)+' chargé');draw();}
-function hydrateState(){try{const presets=loadPresets();const saved=presets[0];if(saved&&saved.state){const st=saved.state;S.bpm=st.bpm??S.bpm;S.tm=st.tm??S.tm;S.sw=st.sw??S.sw;S.g=st.g??S.g;S.pat=Array.isArray(st.pat)?[...st.pat]:[...S.pat];S.lv=Array.isArray(st.lv)?[...st.lv]:[...S.lv];S.kit=st.kit??0;S.practice=st.practice??0;S.humanize=st.humanize??S.humanize;S.mute=Array.isArray(st.mute)?[...S.mute]:[...S.mute];S.solo=st.solo??null;}}catch{} }
+function savePreset(slot){const data={state:{bpm:S.bpm,tm:S.tm,sw:S.sw,sel:S.sel,g:S.g,pat:[...S.pat],bar:S.bar,fx:S.fx,mode:S.mode,lv:[...S.lv],groupBoost:[...S.groupBoost],kit:S.kit,practice:S.practice,humanize:S.humanize,mute:[...S.mute],solo:S.solo},pats:serializePats()};const presets=loadPresets();presets[slot]=data;localStorage.setItem(PRESET_KEY,JSON.stringify(presets));msg('preset '+(slot+1)+' enregistré');draw();}
+function loadPreset(slot){const presets=loadPresets();const data=presets[slot];if(!data)return msg('preset vide');Object.keys(pats).forEach(k=>delete pats[k]);Object.assign(pats,data.pats||{});const st=data.state||{};S.bpm=st.bpm??S.bpm;S.tm=st.tm??S.tm;S.sw=st.sw??S.sw;S.sel=st.sel??S.sel;S.g=st.g??S.g;S.pat=Array.isArray(st.pat)?[...st.pat]:[...S.pat];S.bar=st.bar??0;S.fx=st.fx??0;S.mode=st.mode??'ptn';S.lv=Array.isArray(st.lv)?[...st.lv]:[...S.lv];S.groupBoost=Array.isArray(st.groupBoost)?[...st.groupBoost]:[...S.groupBoost];S.kit=st.kit??0;S.practice=st.practice??0;S.humanize=st.humanize??S.humanize;S.mute=Array.isArray(st.mute)?[...st.mute]:[...S.mute];S.solo=st.solo??null;S.presetSlot=slot;msg('preset '+(slot+1)+' chargé');draw();}
+function hydrateState(){try{const presets=loadPresets();const saved=presets[0];if(saved&&saved.state){const st=saved.state;S.bpm=st.bpm??S.bpm;S.tm=st.tm??S.tm;S.sw=st.sw??S.sw;S.g=st.g??S.g;S.pat=Array.isArray(st.pat)?[...st.pat]:[...S.pat];S.lv=Array.isArray(st.lv)?[...st.lv]:[...S.lv];S.groupBoost=Array.isArray(st.groupBoost)?[...st.groupBoost]:[...S.groupBoost];S.kit=st.kit??0;S.practice=st.practice??0;S.humanize=st.humanize??S.humanize;S.mute=Array.isArray(st.mute)?[...S.mute]:[...S.mute];S.solo=st.solo??null;}}catch{} }
 let AC,bus,filt,dly,fbk,dsd,mast,gg,nb,rev,revGain,sat,satGain;
 function makeDistortionCurve(amount){const samples=44100;const curve=new Float32Array(samples);const k=Math.min(50,Math.max(1,amount));for(let i=0;i<samples;i++){const x=i*2/samples-1;curve[i]=(Math.PI/2)*Math.sin(Math.asin(x))*k/(k+1);}
  return curve;}
@@ -157,6 +157,7 @@ function applyFx(){if(!AC)return;const a=kv[0],b=kv[1];dsd.gain.value=a[0]*.8;fb
  filt.frequency.value=200*Math.pow(80,b[0]);filt.Q.value=.5+b[1]*14;
  if(sat){sat.curve=makeDistortionCurve(1 + S.saturation*20);satGain.gain.value=.22 + S.saturation*1.5;}
  if(revGain){revGain.gain.value=S.reverbWet*1.1;}
+ if(gg){gg.forEach((gain,g)=>{gain.gain.value = (S.mute[g]?0:1) * S.lv[g] * S.groupBoost[g];});}
 }
 function getKitFactor(g){if(S.kit===1)return [1,1.12,0.94,1.06][g]||1; if(S.kit===2)return [1,0.88,1.2,0.96][g]||1; if(S.kit===3)return [0.96,1.16,1.04,1.1][g]||1; if(S.kit===4)return [1.08,0.94,1.18,1.02][g]||1; if(S.kit===5)return [0.9,1.2,1.08,1.15][g]||1; return 1;}
 function voice(g,i,t){const s=snd[g][i],out=gg[g],P=s.p,D=s.d,sm=samples[g+'_'+i];
@@ -191,7 +192,7 @@ function msg(m){$('#lm').textContent=m}
 // UI construction
 const st=$('#st'),pads=$('#pads');
 for(let k=0;k<16;k++){const b=document.createElement('button');b.addEventListener('pointerdown',()=>{const p=pr(),ix=S.bar*16+k;if(ix<p.len){if(S.paintMode){S.paintDragging=1;S.paintValue=!p.s[S.sel][ix];p.s[S.sel][ix]=S.paintValue;draw();} else {p.s[S.sel][ix]^=1;draw();}}});b.addEventListener('pointerenter',()=>{if(!S.paintMode||!S.paintDragging)return;const p=pr(),ix=S.bar*16+k;if(ix<p.len){p.s[S.sel][ix]=S.paintValue;draw();}});b.addEventListener('pointerup',()=>{S.paintDragging=0});st.append(b)}
-'ABCD'.split('').forEach((c,g)=>{const b=document.createElement('button');b.className='b';b.textContent='group '+c;b.onclick=()=>{init();if(S.shift){S.solo=S.solo===g?null:g;S.mute[g]=0;S.shift=0;msg(S.solo===null?'solo off':'solo '+c);draw();return}S.g=g;S.bar=0;S.num=null;sync();msg('group '+c);draw()};$('#grp').append(b)});
+'ABCD'.split('').forEach((c,g)=>{const b=document.createElement('button');b.className='b';b.textContent='group '+c;b.onclick=()=>{init();if(S.shift){S.solo=S.solo===g?null:g;S.mute[g]=0;S.shift=0;msg(S.solo===null?'solo off':'solo '+c);draw();return}S.g=g;S.bar=0;S.num=null;sync();msg('group '+c+' level '+S.lv[g].toFixed(2));draw()};b.ondblclick=()=>{S.groupBoost[g]=cl(S.groupBoost[g] + .15, .5, 1.8);S.lv[g]=cl(S.lv[g] + .08, .25, 1.6);applyFx();msg('group '+c+' boost '+S.groupBoost[g].toFixed(2));draw()};$('#grp').append(b)});
 const presetContainer=$('#presets');for(let i=0;i<4;i++){const btn=document.createElement('button');btn.className='b';btn.textContent='slot '+(i+1);btn.onclick=()=>{const active = S.presetSlot===i;S.presetSlot=i;msg(active?'slot '+(i+1)+' prêt':'slot '+(i+1)+' sélectionné');if(active){savePreset(i);}else{loadPreset(i);}};presetContainer.append(btn)}
 const exportBtn=document.createElement('button');exportBtn.className='b';exportBtn.textContent='export';exportBtn.onclick=()=>{const payload={version:APP_VERSION,presets:loadPresets()};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ko2-presets-'+Date.now()+'.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);msg('presets exportés');};
 const importBtn=document.createElement('button');importBtn.className='b';importBtn.textContent='import';
@@ -238,7 +239,7 @@ $('#live').onclick=()=>{S.live=!S.live;S.liveMuted=0;msg(S.live?'mode performanc
 const fb=$('#fader');fb.onpointerdown=()=>{S.fh=1;msg('choisis : level pitch decay swing');draw()};
 addEventListener('pointerup',()=>{if(S.fh){S.fh=0;draw()}});
 $('#fd').oninput=e=>{init();const v=e.target.value/100,s=snd[S.g][S.sel],f=S.ff;
- if(f==0){S.lv[S.g]=v;gg[S.g].gain.value=v*1.2}else if(f==1){s.p=Math.pow(2,2*v-1)}else if(f==2){s.d=.2*Math.pow(15,v)}else S.sw=v*.6;
+ if(f==0){S.lv[S.g]=v;S.groupBoost[S.g]=cl(S.groupBoost[S.g],.5,1.8);applyFx();}else if(f==1){s.p=Math.pow(2,2*v-1)}else if(f==2){s.d=.2*Math.pow(15,v)}else S.sw=v*.6;
  if(f)fv[f]=v;msg('fader '+FF[f]+' '+Math.round(v*100)+'%')};
 function sync(){$('#fd').value=(S.ff==0?S.lv[S.g]:fv[S.ff])*100}
 // knobs

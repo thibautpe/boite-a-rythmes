@@ -1,11 +1,9 @@
 # Todo list — boîte à rythmes
 
 ## En cours
-- [ ] Feature 5 — effets audio avancés (reverb, saturation)
+- [ ] Tester le comportement clavier et le PWA sur mobile
 
 ## À faire
-- [ ] Feature 6 — plus de kits sonores et réglages par groupe
-- [ ] Tester le comportement clavier et le PWA sur mobile
 - [ ] Finaliser la roadmap de fonctionnalités v2
 
 ## Fait
@@ -16,6 +14,8 @@
 - [x] Feature 2 — mode performance live
 - [x] Feature 3 — enchaînement de patterns / phrases
 - [x] Feature 4 — mode paint / édition rapide des steps
+- [x] Feature 5 — effets audio avancés (reverb, saturation)
+- [x] Feature 6 — plus de kits sonores et réglages par groupe
 - [x] Ajouter un mode pratique / entraînement
 - [x] Implémenter la sauvegarde des presets utilisateur
 - [x] Ajouter le tap tempo
