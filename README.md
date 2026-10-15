@@ -28,6 +28,10 @@ Fichiers principaux :
 - Modifications : ajout d’un mode d’entraînement, d’un tap tempo, de presets locaux, d’un gestionnaire de kits sonores et d’une logique de solo/kit plus pratique pour les sessions de jam ; mise à jour du cache PWA et de la version de publication.
 - À venir : export/import de presets complets, presets utilisateur plus nombreux, amélioration des kits et ajout d’un mode de performance live.
 
+### Feature en cours : export / import des presets
+- Les preset slots peuvent désormais être exportés en fichier JSON et réimportés depuis le navigateur.
+- Cela permet de sauvegarder des arrangements et de les réutiliser sur un autre appareil.
+
 ## Notes
 - Tous les chemins sont relatifs : le projet fonctionne dans un sous-dossier GitHub Pages.
 - Le PWA fonctionne hors ligne après une première visite en ligne.
