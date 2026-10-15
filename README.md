@@ -24,8 +24,8 @@ Fichiers principaux :
 - Le bouton `play` lance le séquenceur, `rec` active l’enregistrement en direct et `shift` active les actions secondaires.
 - Les boutons `−` et `+` ajustent le mode courant (tempo, longueur, timing, etc.).
 
-- Dernière mise à jour : 2026-10-15
-- Modifications : ajout d’un mode d’entraînement, d’un tap tempo, de presets locaux, du mode performance live, du phraseur de patterns, du mode paint, d’effets audio avancés, d’une banque de sons plus complète et d’une sélection de kits plus ergonomique ; mise à jour du cache PWA et de la version de publication.
+- Dernière mise à jour : 2026-10-16
+- Modifications : amélioration de la différenciation des kits sonores pour qu’ils soient nettement plus distincts entre eux ; mise à jour du cache PWA et de la version de publication.
 - À venir : validation mobile finale, refinements UX et enrichissement de la banque sonore.
 
 ### Feature active : performance live + effets

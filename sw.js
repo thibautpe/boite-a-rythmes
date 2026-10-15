@@ -1,5 +1,5 @@
 // Bump VERSION any time the installed assets, manifest or service worker change (index.html is refreshed network-first).
-const VERSION = 'metronome-v1.6.0';
+const VERSION = 'metronome-v1.6.1';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png', './icons/andwhynot-logo.png'];
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 

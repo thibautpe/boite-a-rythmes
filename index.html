@@ -123,21 +123,21 @@ p.n{max-width:440px;color:var(--mute);font-size:11px;margin:14px 0 0}
 </footer>
 <script>
 const $=s=>document.querySelector(s),T=['1/1','1/2','1/4','1/8','1/8T','1/16','1/16T','1/32'],B=[4,2,1,.5,1/3,.25,1/6,.125];
-const APP_VERSION='v1.6.0',APP_DATE='2026-10-15';
+const APP_VERSION='v1.6.1',APP_DATE='2026-10-16';
 const L=['7','8','9','4','5','6','1','2','3','.','0','ent'],SI=[9,10,11,6,7,8,3,4,5,0,1,2],KEYS='123qweasdzxc';
 const DN=['kick','snare','clap','hat','open','tom','rim','bell','bass','perc','shaker','crash'],SC=[0,2,4,7,9,12,14,16,19,21,24,26],NN='c c# d d# e f f# g g# a a# b'.split(' '),BASE=[0,65.41,130.81,261.63];
 const MODES=[['ptn','ptn'],['bpm','tempo'],['len','length'],['bar','bar'],['tmg','timing'],['fx','fx'],['snd','sound'],['smp','sample']];
 const FF=['level','pitch','decay','swing'],FXN=['delay','filter','tempo','reverb','saturation'];
 const KITS=['classic','electro','minimal','analog','ambient','club','lofi','latin'];
 const KIT_PRESETS={
-  classic:{label:'classic',group:[1,1,1,1],pads:[1,1,1,1,1,1,1,1,1,1,1,1]},
-  electro:{label:'electro',group:[1.15,1.2,0.96,1.1],pads:[1.2,1.2,1.3,1.25,1.15,1.1,1.2,1.25,1.2,1.15,1.3,1.35]},
-  minimal:{label:'minimal',group:[0.92,1.1,1.25,1.08],pads:[0.95,1.05,1.1,1.08,1.05,0.98,1.15,1.12,1.1,1.08,1.1,1.2]},
-  analog:{label:'analog',group:[1.05,1.15,0.94,1.12],pads:[1.25,1.15,1.2,1.18,1.08,1.05,1.15,1.18,1.2,1.22,1.18,1.26]},
-  ambient:{label:'ambient',group:[0.96,1.08,1.18,1.18],pads:[1.05,1.1,1.15,1.1,1.2,1.25,1.3,1.25,1.2,1.18,1.25,1.32]},
-  club:{label:'club',group:[1.22,1.26,0.98,1.14],pads:[1.4,1.32,1.28,1.35,1.15,1.12,1.2,1.18,1.3,1.2,1.28,1.42]},
-  lofi:{label:'lofi',group:[0.9,1.05,1.15,1.12],pads:[0.9,1.05,1.1,1.2,1.15,1.08,1.12,1.18,1.08,1.12,1.15,1.2]},
-  latin:{label:'latin',group:[1.08,1.16,1.12,1.22],pads:[1.22,1.18,1.26,1.2,1.16,1.14,1.18,1.22,1.2,1.24,1.3,1.36]}
+  classic:{label:'classic',group:[1,1,1,1],pads:[1,1,1,1,1,1,1,1,1,1,1,1],tone:{bass:'triangle',pluck:'square',bell:'sine',kick:'sine'},freq:{bass:1.0,pluck:1.0,bell:1.0,kick:1.0},decay:{kick:1.0,bass:1.0,pluck:1.0}},
+  electro:{label:'electro',group:[1.35,1.45,1.1,1.25],pads:[1.5,1.4,1.6,1.45,1.25,1.1,1.3,1.25,1.4,1.2,1.45,1.8],tone:{bass:'sawtooth',pluck:'square',bell:'triangle',kick:'square'},freq:{bass:1.18,pluck:1.08,bell:1.14,kick:1.22},decay:{kick:0.7,bass:1.1,pluck:0.8}},
+  minimal:{label:'minimal',group:[0.8,1.0,1.4,1.05],pads:[0.85,0.95,1.1,1.0,1.08,1.0,1.2,1.18,1.12,1.1,1.2,1.25],tone:{bass:'triangle',pluck:'sine',bell:'sine',kick:'triangle'},freq:{bass:0.9,pluck:0.88,bell:0.98,kick:0.82},decay:{kick:1.25,bass:1.3,pluck:1.4}},
+  analog:{label:'analog',group:[1.2,1.3,0.85,1.2],pads:[1.25,1.15,1.2,1.18,1.05,1.0,1.15,1.2,1.25,1.3,1.2,1.35],tone:{bass:'sawtooth',pluck:'triangle',bell:'square',kick:'sawtooth'},freq:{bass:1.32,pluck:1.05,bell:1.2,kick:1.35},decay:{kick:0.78,bass:0.9,pluck:0.82}},
+  ambient:{label:'ambient',group:[0.9,1.15,1.35,1.5],pads:[1.0,1.1,1.2,1.15,1.28,1.4,1.55,1.42,1.3,1.25,1.35,1.6],tone:{bass:'sine',pluck:'triangle',bell:'sine',kick:'sine'},freq:{bass:0.85,pluck:0.95,bell:1.35,kick:0.92},decay:{kick:1.5,bass:1.5,pluck:1.4}},
+  club:{label:'club',group:[1.45,1.5,1.05,1.28],pads:[1.8,1.5,1.42,1.55,1.18,1.1,1.3,1.25,1.4,1.25,1.35,1.7],tone:{bass:'square',pluck:'sawtooth',bell:'triangle',kick:'square'},freq:{bass:1.25,pluck:1.18,bell:1.18,kick:1.48},decay:{kick:0.6,bass:0.8,pluck:0.7}},
+  lofi:{label:'lofi',group:[0.78,1.1,1.25,1.15],pads:[0.8,1.0,1.18,1.25,1.2,1.08,1.14,1.2,1.1,1.15,1.25,1.3],tone:{bass:'triangle',pluck:'sawtooth',bell:'sine',kick:'triangle'},freq:{bass:0.75,pluck:1.06,bell:1.02,kick:0.78},decay:{kick:1.85,bass:1.45,pluck:1.35}},
+  latin:{label:'latin',group:[1.15,1.32,1.2,1.5],pads:[1.3,1.2,1.4,1.38,1.25,1.18,1.25,1.32,1.28,1.3,1.4,1.7],tone:{bass:'square',pluck:'triangle',bell:'triangle',kick:'square'},freq:{bass:1.22,pluck:1.1,bell:1.3,kick:1.4},decay:{kick:0.72,bass:1.0,pluck:0.96}}
 };
 const PRESET_KEY='ko2-presets-v1';
 const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8],groupBoost:[1,1,1,1],kit:0,practice:0,mute:[0,0,0,0],solo:null,tapTimes:[],presetSlot:0,humanize:0.15,live:0,liveMuted:0,phraseMode:0,phraseIndex:0,phraseStep:-1,paintMode:0,paintValue:1,paintDragging:0,reverbWet:.25,reverbDecay:.7,saturation:.35,drive:.5};
@@ -172,6 +172,9 @@ function applyFx(){if(!AC)return;const a=kv[0],b=kv[1];dsd.gain.value=a[0]*.8;fb
 }
 function getKitProfile(){return KIT_PRESETS[KITS[S.kit]]||KIT_PRESETS.classic;}
 function getKitFactor(g){const profile=getKitProfile();return (profile.group&&profile.group[g])||1;}
+function getKitTone(g,kind='bass'){const profile=getKitProfile();const tone=profile.tone&&profile.tone[kind];if(g===1&&kind==='bass')return tone||'triangle';if(g===2&&kind==='pluck')return tone||'square';if(g===3&&kind==='bell')return tone||'sine';return tone||'sine';}
+function getKitFreqBias(g,kind='bass'){const profile=getKitProfile();const freq=profile.freq&&profile.freq[kind];return freq||1;}
+function getKitDecayBias(g,kind='bass'){const profile=getKitProfile();const decay=profile.decay&&profile.decay[kind];return decay||1;}
 function voice(g,i,t){const s=snd[g][i],out=gg[g],P=s.p,D=s.d,sm=samples[g+'_'+i];
  if(S.practice&&g>0)return;
  if(S.solo!==null&&g!==S.solo&&S.solo!==0)return;
@@ -179,12 +182,12 @@ function voice(g,i,t){const s=snd[g][i],out=gg[g],P=s.p,D=s.d,sm=samples[g+'_'+i
  const kitProfile=getKitProfile();const padMix=(kitProfile.pads&&kitProfile.pads[i])||1;
  if(sm){const b=AC.createBufferSource(),e=AC.createGain();b.buffer=sm;b.playbackRate.value=P;e.gain.value=s.v*padMix;b.connect(e).connect(out);b.start(t);return}
  const kitGain=getKitFactor(g),useT=Number.isFinite(t)?t:AC.currentTime;
- const o=(ty,f0,f1,du,a=1)=>{const x=AC.createOscillator(),e=AC.createGain();x.type=ty;x.frequency.setValueAtTime(f0*P*kitGain,useT);x.frequency.exponentialRampToValueAtTime(Math.max(20,f1*P*kitGain),useT+du*D*.6);e.gain.setValueAtTime(a*s.v*padMix,useT);e.gain.exponentialRampToValueAtTime(.001,useT+du*D);x.connect(e).connect(out);x.start(useT);x.stop(useT+du*D+.05)};
- const n=(ft,f,du,a=1,q=1,dl=0)=>{const x=AC.createBufferSource(),e=AC.createGain(),b=AC.createBiquadFilter();x.buffer=nb;b.type=ft;b.frequency.value=f*P*kitGain;b.Q.value=q;e.gain.setValueAtTime(a*s.v*padMix,useT+dl);e.gain.exponentialRampToValueAtTime(.001,useT+dl+du*D);x.connect(b).connect(e).connect(out);x.start(useT+dl);x.stop(useT+dl+du*D+.05)};
- if(g>0){const f=BASE[g]*Math.pow(2,SC[i]/12)*kitGain;
-  if(g==1){o('sawtooth',f,f,.5,.5);o('sine',f/2,f/2,.5,.6)}
-  if(g==2){o('square',f,f*.99,.25,.35);o('triangle',f*2,f*2,.15,.3)}
-  if(g==3){o('sine',f,f,.9,.5);o('sine',f*3.5,f*3.5,.3,.2)}return}
+ const o=(ty,f0,f1,du,a=1)=>{const x=AC.createOscillator(),e=AC.createGain();x.type=ty;x.frequency.setValueAtTime(f0*P*kitGain*getKitFreqBias(g,'bass'),useT);x.frequency.exponentialRampToValueAtTime(Math.max(20,f1*P*kitGain*getKitFreqBias(g,'bass')),useT+du*D*getKitDecayBias(g,'bass')*.6);e.gain.setValueAtTime(a*s.v*padMix,useT);e.gain.exponentialRampToValueAtTime(.001,useT+du*D*getKitDecayBias(g,'bass'));x.connect(e).connect(out);x.start(useT);x.stop(useT+du*D*getKitDecayBias(g,'bass')+.05)};
+ const n=(ft,f,du,a=1,q=1,dl=0)=>{const x=AC.createBufferSource(),e=AC.createGain(),b=AC.createBiquadFilter();x.buffer=nb;b.type=ft;b.frequency.value=f*P*kitGain*getKitFreqBias(g,'pluck');b.Q.value=q;e.gain.setValueAtTime(a*s.v*padMix,useT+dl);e.gain.exponentialRampToValueAtTime(.001,useT+dl+du*D*getKitDecayBias(g,'pluck'));x.connect(b).connect(e).connect(out);x.start(useT+dl);x.stop(useT+dl+du*D*getKitDecayBias(g,'pluck')+.05)};
+ if(g>0){const f=BASE[g]*Math.pow(2,SC[i]/12)*kitGain*getKitFreqBias(g,g===1?'bass':g===2?'pluck':'bell');
+  if(g==1){const bassTone=getKitTone(g,'bass');o(bassTone,f,f*.98,.45,.7);o(bassTone==='sawtooth'?'triangle':'sine',f/2,f/2*.96,.55,.45)}
+  if(g==2){const pluckTone=getKitTone(g,'pluck');o(pluckTone,f,f*.995,.22,.42);o('triangle',f*2,f*2*.995,.16,.25)}
+  if(g==3){const bellTone=getKitTone(g,'bell');o(bellTone,f,f*.96,.8,.55);o('sine',f*2.5,f*2.5*.98,.32,.22)}return}
  switch(i){case 0:o('sine',160,45,.45,1);break;
  case 1:n('bandpass',1900,.2,.8);o('triangle',200,120,.12,.6);break;
  case 2:[0,.012,.024].forEach(d=>n('bandpass',1300,.03,.7,1.5,d));n('bandpass',1300,.2,.6,1.5,.036);break;
