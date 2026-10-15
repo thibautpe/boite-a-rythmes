@@ -25,8 +25,8 @@ Fichiers principaux :
 - Les boutons `−` et `+` ajustent le mode courant (tempo, longueur, timing, etc.).
 
 - Dernière mise à jour : 2026-10-15
-- Modifications : récupération et alignement du projet sur la version actuelle de K.O. II ; mise à jour des fichiers PWA et cache pour refléter l’interface réellement livrée ; ajout d’un footer discret avec logo, version et date de publication.
-- À venir : validation du comportement clavier sur les anciennes configurations de navigateur, nettoyage des réglages de presets et amélioration de la documentation avancée.
+- Modifications : ajout d’un mode d’entraînement, d’un tap tempo, de presets locaux, d’un gestionnaire de kits sonores et d’une logique de solo/kit plus pratique pour les sessions de jam ; mise à jour du cache PWA et de la version de publication.
+- À venir : export/import de presets complets, presets utilisateur plus nombreux, amélioration des kits et ajout d’un mode de performance live.
 
 ## Notes
 - Tous les chemins sont relatifs : le projet fonctionne dans un sous-dossier GitHub Pages.

@@ -40,6 +40,9 @@ h1 .help:hover{background:var(--or);border-color:var(--or);color:#fff}
 #side{display:flex;flex-direction:column;gap:8px;width:64px}
 #side .b{flex:0 0 auto;min-height:40px}
 #sd{display:flex;gap:6px;width:100%}
+#presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+#presets .b{flex:1 1 0;min-width:0;padding:4px 6px;font-size:9px;white-space:nowrap}
+#presets .b.act{background:var(--or);color:#fff}
 p.n{max-width:440px;color:var(--mute);font-size:11px;margin:14px 0 0}
 #foot{width:100%;max-width:440px;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;padding-top:10px;border-top:1px solid rgba(17,17,17,.14);color:var(--mute);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
 #foot .brand{display:inline-flex;align-items:center;gap:8px;color:var(--ink)}
@@ -75,6 +78,7 @@ p.n{max-width:440px;color:var(--mute);font-size:11px;margin:14px 0 0}
  </div>
  <div id="st"></div>
  <div class="row" id="grp"></div>
+ <div class="row" id="presets"></div>
  <div class="row" id="modes"></div>
  <div id="mid">
   <div id="fw"><input type="range" id="fd" min="0" max="100" value="80"><span class="cap" id="ff">level</span></div>
@@ -83,6 +87,9 @@ p.n{max-width:440px;color:var(--mute);font-size:11px;margin:14px 0 0}
    <button class="b or" id="play">play</button>
    <button class="b" id="rec">rec</button>
    <button class="b" id="shift">shift</button>
+   <button class="b" id="tap">tap</button>
+   <button class="b" id="train">train</button>
+   <button class="b" id="kit">kit</button>
    <button class="b" id="fader">fader</button>
    <div id="sd"><button class="b" id="mi">−</button><button class="b" id="pl">+</button></div>
   </div>
@@ -110,16 +117,23 @@ p.n{max-width:440px;color:var(--mute);font-size:11px;margin:14px 0 0}
 </footer>
 <script>
 const $=s=>document.querySelector(s),T=['1/1','1/2','1/4','1/8','1/8T','1/16','1/16T','1/32'],B=[4,2,1,.5,1/3,.25,1/6,.125];
-const APP_VERSION='v1.0.0',APP_DATE='2026-10-15';
+const APP_VERSION='v1.1.0',APP_DATE='2026-10-15';
 const L=['7','8','9','4','5','6','1','2','3','.','0','ent'],SI=[9,10,11,6,7,8,3,4,5,0,1,2],KEYS='123qweasdzxc';
 const DN=['kick','snare','clap','hat','open','tom','rim','bell','bass','perc','shaker','crash'],SC=[0,2,4,7,9,12,14,16,19,21,24,26],NN='c c# d d# e f f# g g# a a# b'.split(' '),BASE=[0,65.41,130.81,261.63];
 const MODES=[['ptn','ptn'],['bpm','tempo'],['len','length'],['bar','bar'],['tmg','timing'],['fx','fx'],['snd','sound'],['smp','sample']];
 const FF=['level','pitch','decay','swing'],FXN=['delay','filter','tempo'];
-const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8]};
+const KITS=['classic','electro','minimal'];
+const PRESET_KEY='ko2-presets-v1';
+const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8],kit:0,practice:0,mute:[0,0,0,0],solo:null,tapTimes:[],presetSlot:0,humanize:0.15};
 const kv=[[.3,.4],[1,.1],[.3,0]],ke=[.5,.3],fv=[.8,.5,.3,0];
 const snd=[0,1,2,3].map(()=>Array.from({length:12},()=>({p:1,d:1,v:1}))),pats={},samples={};
 const PT=(g,n)=>pats[g+'_'+n]??={len:16,s:Array.from({length:12},()=>Array(64).fill(0))};
 const cl=(v,a,b)=>Math.min(b,Math.max(a,v)),pr=(g=S.g)=>PT(g,S.pat[g]);
+function serializePats(){const out={};Object.keys(pats).forEach(k=>{out[k]=pats[k];});return out;}
+function loadPresets(){try{return JSON.parse(localStorage.getItem(PRESET_KEY))||Array.from({length:4},()=>null);}catch{return Array.from({length:4},()=>null);}}
+function savePreset(slot){const data={state:{bpm:S.bpm,tm:S.tm,sw:S.sw,sel:S.sel,g:S.g,pat:[...S.pat],bar:S.bar,fx:S.fx,mode:S.mode,lv:[...S.lv],kit:S.kit,practice:S.practice,humanize:S.humanize,mute:[...S.mute],solo:S.solo},pats:serializePats()};const presets=loadPresets();presets[slot]=data;localStorage.setItem(PRESET_KEY,JSON.stringify(presets));msg('preset '+(slot+1)+' enregistré');draw();}
+function loadPreset(slot){const presets=loadPresets();const data=presets[slot];if(!data)return msg('preset vide');Object.keys(pats).forEach(k=>delete pats[k]);Object.assign(pats,data.pats||{});const st=data.state||{};S.bpm=st.bpm??S.bpm;S.tm=st.tm??S.tm;S.sw=st.sw??S.sw;S.sel=st.sel??S.sel;S.g=st.g??S.g;S.pat=Array.isArray(st.pat)?[...st.pat]:[...S.pat];S.bar=st.bar??0;S.fx=st.fx??0;S.mode=st.mode??'ptn';S.lv=Array.isArray(st.lv)?[...st.lv]:[...S.lv];S.kit=st.kit??0;S.practice=st.practice??0;S.humanize=st.humanize??S.humanize;S.mute=Array.isArray(st.mute)?[...st.mute]:[...S.mute];S.solo=st.solo??null;S.presetSlot=slot;msg('preset '+(slot+1)+' chargé');draw();}
+function hydrateState(){try{const presets=loadPresets();const saved=presets[0];if(saved&&saved.state){const st=saved.state;S.bpm=st.bpm??S.bpm;S.tm=st.tm??S.tm;S.sw=st.sw??S.sw;S.g=st.g??S.g;S.pat=Array.isArray(st.pat)?[...st.pat]:[...S.pat];S.lv=Array.isArray(st.lv)?[...st.lv]:[...S.lv];S.kit=st.kit??0;S.practice=st.practice??0;S.humanize=st.humanize??S.humanize;S.mute=Array.isArray(st.mute)?[...S.mute]:[...S.mute];S.solo=st.solo??null;}}catch{} }
 let AC,bus,filt,dly,fbk,dsd,mast,gg,nb;
 function init(){if(AC){AC.resume();return}
  AC=new(window.AudioContext||window.webkitAudioContext)();mast=AC.createGain();mast.gain.value=.8;mast.connect(AC.destination);
@@ -130,11 +144,16 @@ function init(){if(AC){AC.resume();return}
  applyFx()}
 function applyFx(){if(!AC)return;const a=kv[0],b=kv[1];dsd.gain.value=a[0]*.8;fbk.gain.value=a[1]*.85;dly.delayTime.value=60/S.bpm*.75;
  filt.frequency.value=200*Math.pow(80,b[0]);filt.Q.value=.5+b[1]*14}
+function getKitFactor(g){if(S.kit===1)return [1,1.12,0.94,1.06][g]||1; if(S.kit===2)return [1,0.88,1.2,0.96][g]||1; return 1;}
 function voice(g,i,t){const s=snd[g][i],out=gg[g],P=s.p,D=s.d,sm=samples[g+'_'+i];
+ if(S.practice&&g>0)return;
+ if(S.solo!==null&&g!==S.solo&&S.solo!==0)return;
+ if(S.mute[g])return;
  if(sm){const b=AC.createBufferSource(),e=AC.createGain();b.buffer=sm;b.playbackRate.value=P;e.gain.value=s.v;b.connect(e).connect(out);b.start(t);return}
- const o=(ty,f0,f1,du,a=1)=>{const x=AC.createOscillator(),e=AC.createGain();x.type=ty;x.frequency.setValueAtTime(f0*P,t);x.frequency.exponentialRampToValueAtTime(Math.max(20,f1*P),t+du*D*.6);e.gain.setValueAtTime(a*s.v,t);e.gain.exponentialRampToValueAtTime(.001,t+du*D);x.connect(e).connect(out);x.start(t);x.stop(t+du*D+.05)};
- const n=(ft,f,du,a=1,q=1,dl=0)=>{const x=AC.createBufferSource(),e=AC.createGain(),b=AC.createBiquadFilter();x.buffer=nb;b.type=ft;b.frequency.value=f*P;b.Q.value=q;e.gain.setValueAtTime(a*s.v,t+dl);e.gain.exponentialRampToValueAtTime(.001,t+dl+du*D);x.connect(b).connect(e).connect(out);x.start(t+dl);x.stop(t+dl+du*D+.05)};
- if(g>0){const f=BASE[g]*Math.pow(2,SC[i]/12);
+ const kitGain=getKitFactor(g),useT=Number.isFinite(t)?t:AC.currentTime;
+ const o=(ty,f0,f1,du,a=1)=>{const x=AC.createOscillator(),e=AC.createGain();x.type=ty;x.frequency.setValueAtTime(f0*P*kitGain,useT);x.frequency.exponentialRampToValueAtTime(Math.max(20,f1*P*kitGain),useT+du*D*.6);e.gain.setValueAtTime(a*s.v,useT);e.gain.exponentialRampToValueAtTime(.001,useT+du*D);x.connect(e).connect(out);x.start(useT);x.stop(useT+du*D+.05)};
+ const n=(ft,f,du,a=1,q=1,dl=0)=>{const x=AC.createBufferSource(),e=AC.createGain(),b=AC.createBiquadFilter();x.buffer=nb;b.type=ft;b.frequency.value=f*P*kitGain;b.Q.value=q;e.gain.setValueAtTime(a*s.v,useT+dl);e.gain.exponentialRampToValueAtTime(.001,useT+dl+du*D);x.connect(b).connect(e).connect(out);x.start(useT+dl);x.stop(useT+dl+du*D+.05)};
+ if(g>0){const f=BASE[g]*Math.pow(2,SC[i]/12)*kitGain;
   if(g==1){o('sawtooth',f,f,.5,.5);o('sine',f/2,f/2,.5,.6)}
   if(g==2){o('square',f,f*.99,.25,.35);o('triangle',f*2,f*2,.15,.3)}
   if(g==3){o('sine',f,f,.9,.5);o('sine',f*3.5,f*3.5,.3,.2)}return}
@@ -149,16 +168,17 @@ function voice(g,i,t){const s=snd[g][i],out=gg[g],P=s.p,D=s.d,sm=samples[g+'_'+i
  default:n('highpass',3500,1,.45)}}
 const stepDur=()=>60/S.bpm*B[S.tm];
 let nt=0,nn=0,q=[],tm;
-function sched(){while(nt<AC.currentTime+.12){const d=stepDur(),t=nt+(nn%2?S.sw*d*.5:0);
- for(let g=0;g<4;g++){const p=pr(g),pos=nn%p.len;for(let i=0;i<12;i++)if(p.s[i][pos])voice(g,i,t)}
- q.push({t,n:nn});nt+=d;nn++}}
+function sched(){while(nt<AC.currentTime+.12){const d=stepDur(),baseT=nt+(nn%2?S.sw*d*.5:0);const humanOffset=(S.humanize* d * (Math.random()-.5));
+ for(let g=0;g<4;g++){const p=pr(g),pos=nn%p.len;for(let i=0;i<12;i++)if(p.s[i][pos])voice(g,i,baseT+humanOffset)}
+ q.push({t:baseT,n:nn});nt+=d;nn++}}
 function play(){init();S.play=!S.play;if(S.play){nt=AC.currentTime+.05;nn=0;tm=setInterval(sched,25)}else{clearInterval(tm);q=[];S.cur=-1}draw()}
 function loop(){while(q.length&&AC&&q[0].t<=AC.currentTime){S.cur=q.shift().n;draw(1)}requestAnimationFrame(loop)}
 function msg(m){$('#lm').textContent=m}
 // UI construction
 const st=$('#st'),pads=$('#pads');
 for(let k=0;k<16;k++){const b=document.createElement('button');b.onclick=()=>{const p=pr(),ix=S.bar*16+k;if(ix<p.len){p.s[S.sel][ix]^=1;draw()}};st.append(b)}
-'ABCD'.split('').forEach((c,g)=>{const b=document.createElement('button');b.className='b';b.textContent='group '+c;b.onclick=()=>{init();S.g=g;S.bar=0;S.num=null;sync();msg('group '+c);draw()};$('#grp').append(b)});
+'ABCD'.split('').forEach((c,g)=>{const b=document.createElement('button');b.className='b';b.textContent='group '+c;b.onclick=()=>{init();if(S.shift){S.solo=S.solo===g?null:g;S.mute[g]=0;S.shift=0;msg(S.solo===null?'solo off':'solo '+c);draw();return}S.g=g;S.bar=0;S.num=null;sync();msg('group '+c);draw()};$('#grp').append(b)});
+const presetContainer=$('#presets');for(let i=0;i<4;i++){const btn=document.createElement('button');btn.className='b';btn.textContent='slot '+(i+1);btn.onclick=()=>{const active = S.presetSlot===i;S.presetSlot=i;msg(active?'slot '+(i+1)+' prêt':'slot '+(i+1)+' sélectionné');if(active){savePreset(i);}else{loadPreset(i);}};presetContainer.append(btn)}
 MODES.forEach(([k,l])=>{const b=document.createElement('button');b.className='b';b.id='m_'+k;b.textContent=l;b.onclick=()=>modeBtn(k);$('#modes').append(b)});
 L.forEach((l,gi)=>{const b=document.createElement('button');b.className='b pad';b.innerHTML='<span>'+l+'</span><small></small>';b.onpointerdown=e=>{e.preventDefault();padHit(gi)};pads.append(b)});
 function modeBtn(k){init();
@@ -174,7 +194,10 @@ function padHit(gi){init();const i=SI[gi],el=pads.children[gi];el.classList.add(
  S.sel=i;voice(S.g,i,AC.currentTime);
  if(S.rec&&S.play&&S.cur>=0){const p=pr();p.s[i][S.cur%p.len]=1}draw()}
 addEventListener('keydown',e=>{if(e.repeat)return;if(e.code=='Space'){e.preventDefault();play();return}
- if(e.key=='r'){S.rec=!S.rec;draw();return}const k=KEYS.indexOf(e.key);if(k>=0)padHit(k)});
+ if(e.key=='r'){S.rec=!S.rec;draw();return}
+ if(e.key.toLowerCase()==='s'){S.practice=!S.practice;msg(S.practice?'mode entraînement':'mode normal');draw();return}
+ if(e.key.toLowerCase()==='k'){S.kit=(S.kit+1)%KITS.length;msg('kit '+KITS[S.kit]);draw();return}
+ const k=KEYS.indexOf(e.key);if(k>=0)padHit(k)});
 // +/-
 function step(d){init();const m=S.mode,f=S.shift?10:1;S.shift=0;
  if(m=='bpm'){S.bpm=cl(S.bpm+d*f,40,300);applyFx()}
@@ -188,6 +211,9 @@ function step(d){init();const m=S.mode,f=S.shift?10:1;S.shift=0;
 $('#mi').onclick=()=>step(-1);$('#pl').onclick=()=>step(1);$('#play').onclick=play;
 $('#rec').onclick=()=>{S.rec=!S.rec;msg(S.rec?'enregistrement live':'rec off');draw()};
 $('#shift').onclick=()=>{S.shift=!S.shift;draw()};
+$('#tap').onclick=()=>{const now=performance.now();S.tapTimes.push(now);S.tapTimes=S.tapTimes.filter(t=>now-t<4000);if(S.tapTimes.length<2){msg('tap tempo');return}let total=0;for(let i=1;i<S.tapTimes.length;i++)total+=S.tapTimes[i]-S.tapTimes[i-1];const avg=total/(S.tapTimes.length-1);S.bpm=cl(Math.round(60000/avg),40,300);applyFx();msg('tap '+S.bpm+' bpm');draw()};
+$('#train').onclick=()=>{S.practice=!S.practice;msg(S.practice?'mode entraînement':'mode normal');draw()};
+$('#kit').onclick=()=>{S.kit=(S.kit+1)%KITS.length;msg('kit '+KITS[S.kit]);draw()};
 const fb=$('#fader');fb.onpointerdown=()=>{S.fh=1;msg('choisis : level pitch decay swing');draw()};
 addEventListener('pointerup',()=>{if(S.fh){S.fh=0;draw()}});
 $('#fd').oninput=e=>{init();const v=e.target.value/100,s=snd[S.g][S.sel],f=S.ff;
@@ -219,15 +245,15 @@ function draw(){const p=pr(),pos=S.cur>=0?S.cur%p.len:-1;
  $('#lg').textContent='ABCD'[S.g];$('#lp').textContent='PTN '+(S.num!==null?(S.num||'__'):String(S.pat[S.g]).padStart(2,'0'));
  $('#lb').textContent=S.bpm+' BPM';$('#lt').textContent=T[S.tm]+(S.sw>0?' sw'+Math.round(S.sw/.6*100):'');
  const s=snd[S.g][S.sel];
- $('#lpar').textContent=S.edit?'EDIT p'+s.p.toFixed(2)+' d'+s.d.toFixed(2):{ptn:'',bpm:'TEMPO',len:'LEN '+p.len,bar:'BAR '+(S.bar+1)+'/'+Math.ceil(p.len/16),tmg:'TIMING',fx:'FX '+FXN[S.fx],snd:'SND p'+s.p.toFixed(2),smp:samples[S.g+'_'+S.sel]?'SAMPLE':'SYNTH'}[S.mode];
+ $('#lpar').textContent=S.edit?'EDIT p'+s.p.toFixed(2)+' d'+s.d.toFixed(2):S.practice?'TRAIN '+KITS[S.kit].toUpperCase():{ptn:'',bpm:'TEMPO',len:'LEN '+p.len,bar:'BAR '+(S.bar+1)+'/'+Math.ceil(p.len/16),tmg:'TIMING',fx:'FX '+FXN[S.fx],snd:'SND p'+s.p.toFixed(2),smp:samples[S.g+'_'+S.sel]?'SAMPLE':'SYNTH'}[S.mode];
  [...st.children].forEach((b,k)=>{const ix=S.bar*16+k;b.disabled=ix>=p.len;b.className=(p.s[S.sel][ix]?'on ':'')+(ix==pos?'hd':'')});
  [...pads.children].forEach((b,gi)=>{const i=SI[gi];b.classList.toggle('sel',i==S.sel&&S.num===null);
   b.lastChild.textContent=S.fh?(i<4?FF[i]:''):S.g?NN[(SC[i])%12]+(i>4?'+':''):DN[i]});
  [...$('#grp').children].forEach((b,g)=>b.classList.toggle('act',g==S.g));
+ [...$('#presets').children].forEach((b,idx)=>b.classList.toggle('act',S.presetSlot===idx));
  MODES.forEach(([k])=>$('#m_'+k).classList.toggle('act',S.mode==k&&!S.edit||k=='snd'&&S.edit||k=='smp'&&!!mr));
- $('#play').textContent=S.play?'stop':'play';$('#rec').classList.toggle('act',!!S.rec);$('#shift').classList.toggle('act',!!S.shift);
- $('#ff').textContent=FF[S.ff]}
-sync();syncKnobs();draw();loop();
+ $('#play').textContent=S.play?'stop':'play';$('#rec').classList.toggle('act',!!S.rec);$('#shift').classList.toggle('act',!!S.shift);$('#train').classList.toggle('act',!!S.practice);$('#kit').classList.toggle('act',true);$('#ff').textContent=FF[S.ff]}
+hydrateState();sync();syncKnobs();draw();loop();
 const hp=$('#hp'),hc=()=>hp.hidden=true;
 $('#app-version').textContent=APP_VERSION;$('#app-date').textContent=APP_DATE;
 $('#hb').onclick=()=>hp.hidden=false;$('#hx').onclick=hc;hp.onclick=e=>{if(e.target==hp)hc()};
