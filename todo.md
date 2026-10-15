@@ -16,6 +16,7 @@
 - [x] Feature 4 — mode paint / édition rapide des steps
 - [x] Feature 5 — effets audio avancés (reverb, saturation)
 - [x] Feature 6 — plus de kits sonores et réglages par groupe
+- [x] Feature 7 — banque sonore plus complète et sélection de kits plus ergonomique
 - [x] Ajouter un mode pratique / entraînement
 - [x] Implémenter la sauvegarde des presets utilisateur
 - [x] Ajouter le tap tempo

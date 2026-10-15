@@ -123,12 +123,22 @@ p.n{max-width:440px;color:var(--mute);font-size:11px;margin:14px 0 0}
 </footer>
 <script>
 const $=s=>document.querySelector(s),T=['1/1','1/2','1/4','1/8','1/8T','1/16','1/16T','1/32'],B=[4,2,1,.5,1/3,.25,1/6,.125];
-const APP_VERSION='v1.5.0',APP_DATE='2026-10-15';
+const APP_VERSION='v1.6.0',APP_DATE='2026-10-15';
 const L=['7','8','9','4','5','6','1','2','3','.','0','ent'],SI=[9,10,11,6,7,8,3,4,5,0,1,2],KEYS='123qweasdzxc';
 const DN=['kick','snare','clap','hat','open','tom','rim','bell','bass','perc','shaker','crash'],SC=[0,2,4,7,9,12,14,16,19,21,24,26],NN='c c# d d# e f f# g g# a a# b'.split(' '),BASE=[0,65.41,130.81,261.63];
 const MODES=[['ptn','ptn'],['bpm','tempo'],['len','length'],['bar','bar'],['tmg','timing'],['fx','fx'],['snd','sound'],['smp','sample']];
 const FF=['level','pitch','decay','swing'],FXN=['delay','filter','tempo','reverb','saturation'];
-const KITS=['classic','electro','minimal','analog','ambient','club'];
+const KITS=['classic','electro','minimal','analog','ambient','club','lofi','latin'];
+const KIT_PRESETS={
+  classic:{label:'classic',group:[1,1,1,1],pads:[1,1,1,1,1,1,1,1,1,1,1,1]},
+  electro:{label:'electro',group:[1.15,1.2,0.96,1.1],pads:[1.2,1.2,1.3,1.25,1.15,1.1,1.2,1.25,1.2,1.15,1.3,1.35]},
+  minimal:{label:'minimal',group:[0.92,1.1,1.25,1.08],pads:[0.95,1.05,1.1,1.08,1.05,0.98,1.15,1.12,1.1,1.08,1.1,1.2]},
+  analog:{label:'analog',group:[1.05,1.15,0.94,1.12],pads:[1.25,1.15,1.2,1.18,1.08,1.05,1.15,1.18,1.2,1.22,1.18,1.26]},
+  ambient:{label:'ambient',group:[0.96,1.08,1.18,1.18],pads:[1.05,1.1,1.15,1.1,1.2,1.25,1.3,1.25,1.2,1.18,1.25,1.32]},
+  club:{label:'club',group:[1.22,1.26,0.98,1.14],pads:[1.4,1.32,1.28,1.35,1.15,1.12,1.2,1.18,1.3,1.2,1.28,1.42]},
+  lofi:{label:'lofi',group:[0.9,1.05,1.15,1.12],pads:[0.9,1.05,1.1,1.2,1.15,1.08,1.12,1.18,1.08,1.12,1.15,1.2]},
+  latin:{label:'latin',group:[1.08,1.16,1.12,1.22],pads:[1.22,1.18,1.26,1.2,1.16,1.14,1.18,1.22,1.2,1.24,1.3,1.36]}
+};
 const PRESET_KEY='ko2-presets-v1';
 const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8],groupBoost:[1,1,1,1],kit:0,practice:0,mute:[0,0,0,0],solo:null,tapTimes:[],presetSlot:0,humanize:0.15,live:0,liveMuted:0,phraseMode:0,phraseIndex:0,phraseStep:-1,paintMode:0,paintValue:1,paintDragging:0,reverbWet:.25,reverbDecay:.7,saturation:.35,drive:.5};
 const kv=[[.3,.4],[1,.1],[.3,0],[.25,.7],[.55,.75]],ke=[.5,.3],fv=[.8,.5,.3,0];
@@ -160,15 +170,17 @@ function applyFx(){if(!AC)return;const a=kv[0],b=kv[1];dsd.gain.value=a[0]*.8;fb
  if(revGain){revGain.gain.value=S.reverbWet*1.1;}
  if(gg){gg.forEach((gain,g)=>{gain.gain.value = (S.mute[g]?0:1) * S.lv[g] * S.groupBoost[g];});}
 }
-function getKitFactor(g){if(S.kit===1)return [1,1.12,0.94,1.06][g]||1; if(S.kit===2)return [1,0.88,1.2,0.96][g]||1; if(S.kit===3)return [0.96,1.16,1.04,1.1][g]||1; if(S.kit===4)return [1.08,0.94,1.18,1.02][g]||1; if(S.kit===5)return [0.9,1.2,1.08,1.15][g]||1; return 1;}
+function getKitProfile(){return KIT_PRESETS[KITS[S.kit]]||KIT_PRESETS.classic;}
+function getKitFactor(g){const profile=getKitProfile();return (profile.group&&profile.group[g])||1;}
 function voice(g,i,t){const s=snd[g][i],out=gg[g],P=s.p,D=s.d,sm=samples[g+'_'+i];
  if(S.practice&&g>0)return;
  if(S.solo!==null&&g!==S.solo&&S.solo!==0)return;
  if(S.mute[g])return;
- if(sm){const b=AC.createBufferSource(),e=AC.createGain();b.buffer=sm;b.playbackRate.value=P;e.gain.value=s.v;b.connect(e).connect(out);b.start(t);return}
+ const kitProfile=getKitProfile();const padMix=(kitProfile.pads&&kitProfile.pads[i])||1;
+ if(sm){const b=AC.createBufferSource(),e=AC.createGain();b.buffer=sm;b.playbackRate.value=P;e.gain.value=s.v*padMix;b.connect(e).connect(out);b.start(t);return}
  const kitGain=getKitFactor(g),useT=Number.isFinite(t)?t:AC.currentTime;
- const o=(ty,f0,f1,du,a=1)=>{const x=AC.createOscillator(),e=AC.createGain();x.type=ty;x.frequency.setValueAtTime(f0*P*kitGain,useT);x.frequency.exponentialRampToValueAtTime(Math.max(20,f1*P*kitGain),useT+du*D*.6);e.gain.setValueAtTime(a*s.v,useT);e.gain.exponentialRampToValueAtTime(.001,useT+du*D);x.connect(e).connect(out);x.start(useT);x.stop(useT+du*D+.05)};
- const n=(ft,f,du,a=1,q=1,dl=0)=>{const x=AC.createBufferSource(),e=AC.createGain(),b=AC.createBiquadFilter();x.buffer=nb;b.type=ft;b.frequency.value=f*P*kitGain;b.Q.value=q;e.gain.setValueAtTime(a*s.v,useT+dl);e.gain.exponentialRampToValueAtTime(.001,useT+dl+du*D);x.connect(b).connect(e).connect(out);x.start(useT+dl);x.stop(useT+dl+du*D+.05)};
+ const o=(ty,f0,f1,du,a=1)=>{const x=AC.createOscillator(),e=AC.createGain();x.type=ty;x.frequency.setValueAtTime(f0*P*kitGain,useT);x.frequency.exponentialRampToValueAtTime(Math.max(20,f1*P*kitGain),useT+du*D*.6);e.gain.setValueAtTime(a*s.v*padMix,useT);e.gain.exponentialRampToValueAtTime(.001,useT+du*D);x.connect(e).connect(out);x.start(useT);x.stop(useT+du*D+.05)};
+ const n=(ft,f,du,a=1,q=1,dl=0)=>{const x=AC.createBufferSource(),e=AC.createGain(),b=AC.createBiquadFilter();x.buffer=nb;b.type=ft;b.frequency.value=f*P*kitGain;b.Q.value=q;e.gain.setValueAtTime(a*s.v*padMix,useT+dl);e.gain.exponentialRampToValueAtTime(.001,useT+dl+du*D);x.connect(b).connect(e).connect(out);x.start(useT+dl);x.stop(useT+dl+du*D+.05)};
  if(g>0){const f=BASE[g]*Math.pow(2,SC[i]/12)*kitGain;
   if(g==1){o('sawtooth',f,f,.5,.5);o('sine',f/2,f/2,.5,.6)}
   if(g==2){o('square',f,f*.99,.25,.35);o('triangle',f*2,f*2,.15,.3)}
@@ -218,7 +230,7 @@ function padHit(gi){init();const i=SI[gi],el=pads.children[gi];el.classList.add(
 addEventListener('keydown',e=>{if(e.repeat)return;if(e.code=='Space'){e.preventDefault();play();return}
  if(e.key=='r'){S.rec=!S.rec;draw();return}
  if(e.key.toLowerCase()==='s'){S.practice=!S.practice;msg(S.practice?'mode entraînement':'mode normal');draw();return}
- if(e.key.toLowerCase()==='k'){S.kit=(S.kit+1)%KITS.length;msg('kit '+KITS[S.kit]);draw();return}
+ if(e.key.toLowerCase()==='k'){S.kit=(S.kit+1)%KITS.length;msg('kit '+getKitProfile().label);draw();return}
  const k=KEYS.indexOf(e.key);if(k>=0)padHit(k)});
 // +/-
 function step(d){init();const m=S.mode,f=S.shift?10:1;S.shift=0;
@@ -283,7 +295,7 @@ function draw(){const p=pr(),pos=S.cur>=0?S.cur%p.len:-1;
  [...$('#presets').children].forEach((b,idx)=>b.classList.toggle('act',S.presetSlot===idx));
  [...$('#live-controls').children].forEach((b)=>{const label=b.textContent.trim(); b.classList.toggle('act',label==='live'&&S.live || label==='mute all'&&S.liveMuted || label==='phrase'&&S.phraseMode || label==='paint'&&S.paintMode);});
  MODES.forEach(([k])=>$('#m_'+k).classList.toggle('act',S.mode==k&&!S.edit||k=='snd'&&S.edit||k=='smp'&&!!mr));
- $('#play').textContent=S.play?'stop':'play';$('#rec').classList.toggle('act',!!S.rec);$('#shift').classList.toggle('act',!!S.shift);$('#train').classList.toggle('act',!!S.practice);$('#kit').classList.toggle('act',true);$('#live').classList.toggle('act',!!S.live);$('#ff').textContent=FF[S.ff]}
+ $('#play').textContent=S.play?'stop':'play';$('#rec').classList.toggle('act',!!S.rec);$('#shift').classList.toggle('act',!!S.shift);$('#train').classList.toggle('act',!!S.practice);$('#kit').textContent='kit '+getKitProfile().label;$('#kit').classList.toggle('act',true);$('#live').classList.toggle('act',!!S.live);$('#ff').textContent=FF[S.ff]}
 hydrateState();sync();syncKnobs();draw();loop();
 const hp=$('#hp'),hc=()=>hp.hidden=true;
 $('#app-version').textContent=APP_VERSION;$('#app-date').textContent=APP_DATE;

@@ -25,8 +25,8 @@ Fichiers principaux :
 - Les boutons `−` et `+` ajustent le mode courant (tempo, longueur, timing, etc.).
 
 - Dernière mise à jour : 2026-10-15
-- Modifications : ajout d’un mode d’entraînement, d’un tap tempo, de presets locaux, du mode performance live, du phraseur de patterns, du mode paint, de nouveaux effets audio avancés ainsi que de kits supplémentaires et de réglages de niveau par groupe ; mise à jour du cache PWA et de la version de publication.
-- À venir : validation mobile finale, polish UX et enrichissement des sons disponibles.
+- Modifications : ajout d’un mode d’entraînement, d’un tap tempo, de presets locaux, du mode performance live, du phraseur de patterns, du mode paint, d’effets audio avancés, d’une banque de sons plus complète et d’une sélection de kits plus ergonomique ; mise à jour du cache PWA et de la version de publication.
+- À venir : validation mobile finale, refinements UX et enrichissement de la banque sonore.
 
 ### Feature active : performance live + effets
 - Le bouton `live` active un mode de scène plus rapide pour jouer et ajuster un groove en direct.
