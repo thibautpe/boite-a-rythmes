@@ -29,17 +29,18 @@ h1 .help:hover{background:var(--or);border-color:var(--or);color:#fff}
 .b:active,.b.hit{transform:translateY(2px);box-shadow:0 0 0 var(--sh)}
 .b.act::after{content:"";position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--or)}
 .b.or{background:var(--or);color:#fff}
-#mid{display:flex;gap:12px;flex-wrap:wrap}
+#mid{display:grid;grid-template-columns:44px minmax(0,1fr) 64px;gap:12px;align-items:start;width:100%}
 #fw{display:flex;flex-direction:column;align-items:center;width:44px}
 #fd{writing-mode:vertical-lr;direction:rtl;width:30px;height:210px;accent-color:var(--or);margin:0}
-#pads{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.pad{aspect-ratio:1;border-radius:6px;font-size:16px;font-weight:700;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;padding:7px 8px;text-align:left}
+#pads{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-width:0;width:100%}
+.pad{aspect-ratio:1;border-radius:6px;font-size:16px;font-weight:700;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;padding:7px 8px;text-align:left;min-width:0}
 .pad small{font-size:9px;font-weight:400;color:#666}
 .pad.sel{outline:2px solid var(--or);outline-offset:-2px}
 .pad.hit{background:var(--or);color:#fff}.pad.hit small{color:#fff}
-#side{display:flex;flex-direction:column;gap:8px;width:64px}
+#side{display:flex;flex-direction:column;gap:8px;width:64px;flex-shrink:0}
 #side .b{flex:0 0 auto;min-height:40px}
 #sd{display:flex;gap:6px;width:100%}
+@media (max-width:420px){#mid{grid-template-columns:1fr;gap:10px}#fw{width:100%}#fd{writing-mode:horizontal-tb;direction:ltr;width:100%;height:36px}#side{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));}#side .b{min-height:36px}#sd{grid-column:1 / -1}} 
 #presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 #presets .b{flex:1 1 0;min-width:0;padding:4px 6px;font-size:9px;white-space:nowrap}
 #presets .b.act{background:var(--or);color:#fff}
