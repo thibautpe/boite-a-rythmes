@@ -25,12 +25,13 @@ Fichiers principaux :
 - Les boutons `−` et `+` ajustent le mode courant (tempo, longueur, timing, etc.).
 
 - Dernière mise à jour : 2026-10-15
-- Modifications : ajout d’un mode d’entraînement, d’un tap tempo, de presets locaux, d’un gestionnaire de kits sonores et d’une logique de solo/kit plus pratique pour les sessions de jam ; mise à jour du cache PWA et de la version de publication.
-- À venir : export/import de presets complets, presets utilisateur plus nombreux, amélioration des kits et ajout d’un mode de performance live.
+- Modifications : ajout d’un mode d’entraînement, d’un tap tempo, de presets locaux, d’un gestionnaire de kits sonores et d’une logique de solo/kit plus pratique pour les sessions de jam ; ajout du mode performance live avec fill et mute global ; mise à jour du cache PWA et de la version de publication.
+- À venir : enchaînement de patterns / phrases, mode paint, effets audio avancés et ajout de kits sonores plus nombreux.
 
-### Feature en cours : export / import des presets
-- Les preset slots peuvent désormais être exportés en fichier JSON et réimportés depuis le navigateur.
-- Cela permet de sauvegarder des arrangements et de les réutiliser sur un autre appareil.
+### Feature active : mode performance live
+- Le bouton `live` active un mode de scène plus rapide pour jouer et ajuster un groove en direct.
+- Le bouton `fill` injecte un accent rapide sur le pattern courant.
+- Le bouton `mute all` coupe ou remet tout le son d’un coup pour préparer un break ou une transition.
 
 ## Notes
 - Tous les chemins sont relatifs : le projet fonctionne dans un sous-dossier GitHub Pages.

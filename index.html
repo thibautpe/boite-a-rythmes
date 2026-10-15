@@ -43,6 +43,9 @@ h1 .help:hover{background:var(--or);border-color:var(--or);color:#fff}
 #presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 #presets .b{flex:1 1 0;min-width:0;padding:4px 6px;font-size:9px;white-space:nowrap}
 #presets .b.act{background:var(--or);color:#fff}
+#live-controls{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+#live-controls .b{flex:1 1 0;min-width:0;padding:4px 6px;font-size:9px;white-space:nowrap}
+#live-controls .b.act{background:var(--or);color:#fff}
 p.n{max-width:440px;color:var(--mute);font-size:11px;margin:14px 0 0}
 #foot{width:100%;max-width:440px;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;padding-top:10px;border-top:1px solid rgba(17,17,17,.14);color:var(--mute);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
 #foot .brand{display:inline-flex;align-items:center;gap:8px;color:var(--ink)}
@@ -79,6 +82,7 @@ p.n{max-width:440px;color:var(--mute);font-size:11px;margin:14px 0 0}
  <div id="st"></div>
  <div class="row" id="grp"></div>
  <div class="row" id="presets"></div>
+ <div class="row" id="live-controls"></div>
  <div class="row" id="modes"></div>
  <div id="mid">
   <div id="fw"><input type="range" id="fd" min="0" max="100" value="80"><span class="cap" id="ff">level</span></div>
@@ -90,6 +94,7 @@ p.n{max-width:440px;color:var(--mute);font-size:11px;margin:14px 0 0}
    <button class="b" id="tap">tap</button>
    <button class="b" id="train">train</button>
    <button class="b" id="kit">kit</button>
+   <button class="b" id="live">live</button>
    <button class="b" id="fader">fader</button>
    <div id="sd"><button class="b" id="mi">−</button><button class="b" id="pl">+</button></div>
   </div>
@@ -117,14 +122,14 @@ p.n{max-width:440px;color:var(--mute);font-size:11px;margin:14px 0 0}
 </footer>
 <script>
 const $=s=>document.querySelector(s),T=['1/1','1/2','1/4','1/8','1/8T','1/16','1/16T','1/32'],B=[4,2,1,.5,1/3,.25,1/6,.125];
-const APP_VERSION='v1.1.2',APP_DATE='2026-10-15';
+const APP_VERSION='v1.2.0',APP_DATE='2026-10-15';
 const L=['7','8','9','4','5','6','1','2','3','.','0','ent'],SI=[9,10,11,6,7,8,3,4,5,0,1,2],KEYS='123qweasdzxc';
 const DN=['kick','snare','clap','hat','open','tom','rim','bell','bass','perc','shaker','crash'],SC=[0,2,4,7,9,12,14,16,19,21,24,26],NN='c c# d d# e f f# g g# a a# b'.split(' '),BASE=[0,65.41,130.81,261.63];
 const MODES=[['ptn','ptn'],['bpm','tempo'],['len','length'],['bar','bar'],['tmg','timing'],['fx','fx'],['snd','sound'],['smp','sample']];
 const FF=['level','pitch','decay','swing'],FXN=['delay','filter','tempo'];
 const KITS=['classic','electro','minimal'];
 const PRESET_KEY='ko2-presets-v1';
-const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8],kit:0,practice:0,mute:[0,0,0,0],solo:null,tapTimes:[],presetSlot:0,humanize:0.15};
+const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8],kit:0,practice:0,mute:[0,0,0,0],solo:null,tapTimes:[],presetSlot:0,humanize:0.15,live:0,liveMuted:0};
 const kv=[[.3,.4],[1,.1],[.3,0]],ke=[.5,.3],fv=[.8,.5,.3,0];
 const snd=[0,1,2,3].map(()=>Array.from({length:12},()=>({p:1,d:1,v:1}))),pats={},samples={};
 const PT=(g,n)=>pats[g+'_'+n]??={len:16,s:Array.from({length:12},()=>Array(64).fill(0))};
@@ -184,6 +189,7 @@ const importBtn=document.createElement('button');importBtn.className='b';importB
 const importInput=document.createElement('input');importInput.type='file';importInput.accept='.json,application/json';importInput.hidden=true;importInput.onchange=evt=>{const file=evt.target.files&&evt.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(String(reader.result));const presets=Array.isArray(data)?data:Array.isArray(data.presets)?data.presets:loadPresets();localStorage.setItem(PRESET_KEY,JSON.stringify(Array.from({length:4},(_,i)=>presets[i]||null)));msg('presets importés');if(Array.isArray(presets)&&presets[0])loadPreset(0);draw();}catch(err){msg('fichier invalide');}};reader.readAsText(file);evt.target.value='';};
 importBtn.onclick=()=>importInput.click();
 presetContainer.append(exportBtn,importBtn,importInput);
+const liveControls=$('#live-controls');['fill','mute all','live'].forEach((label,idx)=>{const b=document.createElement('button');b.className='b';b.textContent=label;b.dataset.action=label;b.onclick=()=>{if(label==='live'){S.live=!S.live;S.liveMuted=0;msg(S.live?'mode performance live':'mode normal');draw();return;} if(label==='fill'){if(!S.live){msg('active le live');return;} const p=pr();const stepBase=(S.bar*16)%p.len;[0,4,8,12].forEach(off=>{const pos=(stepBase+off)%p.len;for(let i=0;i<12;i++)if(i===S.sel||i===S.sel+1||i===S.sel+2)p.s[i][pos]=1;});msg('fill ajouté');draw();return;} S.liveMuted=!S.liveMuted;S.mute=[1,1,1,1];if(!S.liveMuted){S.mute=[0,0,0,0];}msg(S.liveMuted?'tout muet':'tout audible');draw();};liveControls.append(b)});
 MODES.forEach(([k,l])=>{const b=document.createElement('button');b.className='b';b.id='m_'+k;b.textContent=l;b.onclick=()=>modeBtn(k);$('#modes').append(b)});
 L.forEach((l,gi)=>{const b=document.createElement('button');b.className='b pad';b.innerHTML='<span>'+l+'</span><small></small>';b.onpointerdown=e=>{e.preventDefault();padHit(gi)};pads.append(b)});
 function modeBtn(k){init();
@@ -219,6 +225,7 @@ $('#shift').onclick=()=>{S.shift=!S.shift;draw()};
 $('#tap').onclick=()=>{const now=performance.now();S.tapTimes.push(now);S.tapTimes=S.tapTimes.filter(t=>now-t<4000);if(S.tapTimes.length<2){msg('tap tempo');return}let total=0;for(let i=1;i<S.tapTimes.length;i++)total+=S.tapTimes[i]-S.tapTimes[i-1];const avg=total/(S.tapTimes.length-1);S.bpm=cl(Math.round(60000/avg),40,300);applyFx();msg('tap '+S.bpm+' bpm');draw()};
 $('#train').onclick=()=>{S.practice=!S.practice;msg(S.practice?'mode entraînement':'mode normal');draw()};
 $('#kit').onclick=()=>{S.kit=(S.kit+1)%KITS.length;msg('kit '+KITS[S.kit]);draw()};
+$('#live').onclick=()=>{S.live=!S.live;S.liveMuted=0;msg(S.live?'mode performance live':'mode normal');draw()};
 const fb=$('#fader');fb.onpointerdown=()=>{S.fh=1;msg('choisis : level pitch decay swing');draw()};
 addEventListener('pointerup',()=>{if(S.fh){S.fh=0;draw()}});
 $('#fd').oninput=e=>{init();const v=e.target.value/100,s=snd[S.g][S.sel],f=S.ff;
@@ -256,8 +263,9 @@ function draw(){const p=pr(),pos=S.cur>=0?S.cur%p.len:-1;
   b.lastChild.textContent=S.fh?(i<4?FF[i]:''):S.g?NN[(SC[i])%12]+(i>4?'+':''):DN[i]});
  [...$('#grp').children].forEach((b,g)=>b.classList.toggle('act',g==S.g));
  [...$('#presets').children].forEach((b,idx)=>b.classList.toggle('act',S.presetSlot===idx));
+ [...$('#live-controls').children].forEach((b)=>{const label=b.textContent.trim(); b.classList.toggle('act',label==='live'&&S.live || label==='mute all'&&S.liveMuted);});
  MODES.forEach(([k])=>$('#m_'+k).classList.toggle('act',S.mode==k&&!S.edit||k=='snd'&&S.edit||k=='smp'&&!!mr));
- $('#play').textContent=S.play?'stop':'play';$('#rec').classList.toggle('act',!!S.rec);$('#shift').classList.toggle('act',!!S.shift);$('#train').classList.toggle('act',!!S.practice);$('#kit').classList.toggle('act',true);$('#ff').textContent=FF[S.ff]}
+ $('#play').textContent=S.play?'stop':'play';$('#rec').classList.toggle('act',!!S.rec);$('#shift').classList.toggle('act',!!S.shift);$('#train').classList.toggle('act',!!S.practice);$('#kit').classList.toggle('act',true);$('#live').classList.toggle('act',!!S.live);$('#ff').textContent=FF[S.ff]}
 hydrateState();sync();syncKnobs();draw();loop();
 const hp=$('#hp'),hc=()=>hp.hidden=true;
 $('#app-version').textContent=APP_VERSION;$('#app-date').textContent=APP_DATE;
