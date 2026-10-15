@@ -129,7 +129,7 @@ const MODES=[['ptn','ptn'],['bpm','tempo'],['len','length'],['bar','bar'],['tmg'
 const FF=['level','pitch','decay','swing'],FXN=['delay','filter','tempo'];
 const KITS=['classic','electro','minimal'];
 const PRESET_KEY='ko2-presets-v1';
-const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8],kit:0,practice:0,mute:[0,0,0,0],solo:null,tapTimes:[],presetSlot:0,humanize:0.15,live:0,liveMuted:0};
+const S={g:0,pat:[1,1,1,1],sel:0,bpm:120,tm:5,sw:0,play:0,rec:0,shift:0,mode:'ptn',bar:0,fx:0,edit:0,num:null,fh:0,ff:0,cur:-1,lv:[.8,.8,.8,.8],kit:0,practice:0,mute:[0,0,0,0],solo:null,tapTimes:[],presetSlot:0,humanize:0.15,live:0,liveMuted:0,phraseMode:0,phraseIndex:0,phraseStep:-1};
 const kv=[[.3,.4],[1,.1],[.3,0]],ke=[.5,.3],fv=[.8,.5,.3,0];
 const snd=[0,1,2,3].map(()=>Array.from({length:12},()=>({p:1,d:1,v:1}))),pats={},samples={};
 const PT=(g,n)=>pats[g+'_'+n]??={len:16,s:Array.from({length:12},()=>Array(64).fill(0))};
@@ -177,7 +177,7 @@ function sched(){while(nt<AC.currentTime+.12){const d=stepDur(),baseT=nt+(nn%2?S
  for(let g=0;g<4;g++){const p=pr(g),pos=nn%p.len;for(let i=0;i<12;i++)if(p.s[i][pos])voice(g,i,baseT+humanOffset)}
  q.push({t:baseT,n:nn});nt+=d;nn++}}
 function play(){init();S.play=!S.play;if(S.play){nt=AC.currentTime+.05;nn=0;tm=setInterval(sched,25)}else{clearInterval(tm);q=[];S.cur=-1}draw()}
-function loop(){while(q.length&&AC&&q[0].t<=AC.currentTime){S.cur=q.shift().n;draw(1)}requestAnimationFrame(loop)}
+function loop(){while(q.length&&AC&&q[0].t<=AC.currentTime){S.cur=q.shift().n;if(S.phraseMode&&S.cur>=0&&S.cur!==S.phraseStep&&S.cur%Math.max(1,Math.min(16,pr().len))===0){S.phraseStep=S.cur;const base=S.pat[S.g]||1;const next=(S.phraseIndex+1)%4;S.phraseIndex=next;S.pat=[0,1,2,3].map((idx)=>((base+idx+next)%99)+1);msg('phrase '+(next+1));}draw(1)}requestAnimationFrame(loop)}
 function msg(m){$('#lm').textContent=m}
 // UI construction
 const st=$('#st'),pads=$('#pads');
@@ -189,7 +189,7 @@ const importBtn=document.createElement('button');importBtn.className='b';importB
 const importInput=document.createElement('input');importInput.type='file';importInput.accept='.json,application/json';importInput.hidden=true;importInput.onchange=evt=>{const file=evt.target.files&&evt.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(String(reader.result));const presets=Array.isArray(data)?data:Array.isArray(data.presets)?data.presets:loadPresets();localStorage.setItem(PRESET_KEY,JSON.stringify(Array.from({length:4},(_,i)=>presets[i]||null)));msg('presets importés');if(Array.isArray(presets)&&presets[0])loadPreset(0);draw();}catch(err){msg('fichier invalide');}};reader.readAsText(file);evt.target.value='';};
 importBtn.onclick=()=>importInput.click();
 presetContainer.append(exportBtn,importBtn,importInput);
-const liveControls=$('#live-controls');['fill','mute all','live'].forEach((label,idx)=>{const b=document.createElement('button');b.className='b';b.textContent=label;b.dataset.action=label;b.onclick=()=>{if(label==='live'){S.live=!S.live;S.liveMuted=0;msg(S.live?'mode performance live':'mode normal');draw();return;} if(label==='fill'){if(!S.live){msg('active le live');return;} const p=pr();const stepBase=(S.bar*16)%p.len;[0,4,8,12].forEach(off=>{const pos=(stepBase+off)%p.len;for(let i=0;i<12;i++)if(i===S.sel||i===S.sel+1||i===S.sel+2)p.s[i][pos]=1;});msg('fill ajouté');draw();return;} S.liveMuted=!S.liveMuted;S.mute=[1,1,1,1];if(!S.liveMuted){S.mute=[0,0,0,0];}msg(S.liveMuted?'tout muet':'tout audible');draw();};liveControls.append(b)});
+const liveControls=$('#live-controls');['fill','mute all','live','phrase'].forEach((label,idx)=>{const b=document.createElement('button');b.className='b';b.textContent=label;b.dataset.action=label;b.onclick=()=>{if(label==='live'){S.live=!S.live;S.liveMuted=0;msg(S.live?'mode performance live':'mode normal');draw();return;} if(label==='phrase'){S.phraseMode=!S.phraseMode;S.phraseIndex=0;S.phraseStep=-1;msg(S.phraseMode?'phrase mode actif':'phrase off');draw();return;} if(label==='fill'){if(!S.live){msg('active le live');return;} const p=pr();const stepBase=(S.bar*16)%p.len;[0,4,8,12].forEach(off=>{const pos=(stepBase+off)%p.len;for(let i=0;i<12;i++)if(i===S.sel||i===S.sel+1||i===S.sel+2)p.s[i][pos]=1;});msg('fill ajouté');draw();return;} S.liveMuted=!S.liveMuted;S.mute=[1,1,1,1];if(!S.liveMuted){S.mute=[0,0,0,0];}msg(S.liveMuted?'tout muet':'tout audible');draw();};liveControls.append(b)});
 MODES.forEach(([k,l])=>{const b=document.createElement('button');b.className='b';b.id='m_'+k;b.textContent=l;b.onclick=()=>modeBtn(k);$('#modes').append(b)});
 L.forEach((l,gi)=>{const b=document.createElement('button');b.className='b pad';b.innerHTML='<span>'+l+'</span><small></small>';b.onpointerdown=e=>{e.preventDefault();padHit(gi)};pads.append(b)});
 function modeBtn(k){init();
@@ -263,7 +263,7 @@ function draw(){const p=pr(),pos=S.cur>=0?S.cur%p.len:-1;
   b.lastChild.textContent=S.fh?(i<4?FF[i]:''):S.g?NN[(SC[i])%12]+(i>4?'+':''):DN[i]});
  [...$('#grp').children].forEach((b,g)=>b.classList.toggle('act',g==S.g));
  [...$('#presets').children].forEach((b,idx)=>b.classList.toggle('act',S.presetSlot===idx));
- [...$('#live-controls').children].forEach((b)=>{const label=b.textContent.trim(); b.classList.toggle('act',label==='live'&&S.live || label==='mute all'&&S.liveMuted);});
+ [...$('#live-controls').children].forEach((b)=>{const label=b.textContent.trim(); b.classList.toggle('act',label==='live'&&S.live || label==='mute all'&&S.liveMuted || label==='phrase'&&S.phraseMode);});
  MODES.forEach(([k])=>$('#m_'+k).classList.toggle('act',S.mode==k&&!S.edit||k=='snd'&&S.edit||k=='smp'&&!!mr));
  $('#play').textContent=S.play?'stop':'play';$('#rec').classList.toggle('act',!!S.rec);$('#shift').classList.toggle('act',!!S.shift);$('#train').classList.toggle('act',!!S.practice);$('#kit').classList.toggle('act',true);$('#live').classList.toggle('act',!!S.live);$('#ff').textContent=FF[S.ff]}
 hydrateState();sync();syncKnobs();draw();loop();

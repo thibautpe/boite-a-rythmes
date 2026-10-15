@@ -1,10 +1,9 @@
 # Todo list — boîte à rythmes
 
 ## En cours
-- [ ] Feature 2 — mode performance live
+- [ ] Feature 3 — enchaînement de patterns / phrases
 
 ## À faire
-- [ ] Feature 3 — enchaînement de patterns / phrases
 - [ ] Feature 4 — mode paint / édition rapide des steps
 - [ ] Feature 5 — effets audio avancés (reverb, saturation)
 - [ ] Feature 6 — plus de kits sonores et réglages par groupe
